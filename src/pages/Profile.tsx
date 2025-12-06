@@ -62,7 +62,7 @@ export const Profile: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">Loading profile...</p>
+        <p className="text-gray-600 dark:text-gray-400">Loading profile...</p>
       </div>
     );
   }
@@ -70,8 +70,8 @@ export const Profile: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile & Settings</h1>
-        <p className="text-gray-600">Manage your profile and preferences.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2">Profile & Settings</h1>
+        <p className="text-gray-600 dark:text-gray-400">Manage your profile and preferences.</p>
       </div>
 
       {/* Profile Card */}
@@ -127,7 +127,7 @@ export const Profile: React.FC = () => {
             ) : (
               <>
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
                     {currentUser.displayName}
                   </h2>
                   <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
@@ -135,9 +135,9 @@ export const Profile: React.FC = () => {
                   </Button>
                 </div>
                 {currentUser.bio && (
-                  <p className="text-gray-600 mb-4">{currentUser.bio}</p>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">{currentUser.bio}</p>
                 )}
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                   <UserIcon className="h-4 w-4" />
                   <span>
                     Role: {currentUser.role === 'both' ? 'User & Validator' : currentUser.role}
@@ -152,15 +152,15 @@ export const Profile: React.FC = () => {
       {/* Wallet & Web3 Section */}
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Wallet className="h-5 w-5 text-gray-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Wallet & Web3</h2>
+          <Wallet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Wallet & Web3</h2>
         </div>
         <div className="space-y-4">
           {isWalletConnected ? (
             <>
               <div>
-                <p className="text-sm text-gray-600 mb-1">Wallet Address</p>
-                <p className="font-mono text-sm text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Wallet Address</p>
+                <p className="font-mono text-sm text-gray-900 dark:text-gray-50">
                   {currentUser.walletAddress || 'Not connected'}
                 </p>
               </div>
@@ -170,7 +170,7 @@ export const Profile: React.FC = () => {
             </>
           ) : (
             <>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 Connect a Neo-compatible wallet to interact with the blockchain.
               </p>
               <Button variant="primary" onClick={handleWalletConnect}>
@@ -179,8 +179,8 @@ export const Profile: React.FC = () => {
               </Button>
             </>
           )}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <p className="text-sm text-blue-800">
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               <strong>Coming Soon:</strong> Full Neo blockchain integration and SpoonOS
               agent connectivity.
             </p>
@@ -191,14 +191,14 @@ export const Profile: React.FC = () => {
       {/* Preferences */}
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <Bell className="h-5 w-5 text-gray-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Preferences</h2>
+          <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Preferences</h2>
         </div>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900">Available as Validator</p>
-              <p className="text-sm text-gray-600">
+              <p className="font-medium text-gray-900 dark:text-gray-50">Available as Validator</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Allow others to invite you as a validator
               </p>
             </div>
@@ -217,8 +217,8 @@ export const Profile: React.FC = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900">Enable Notifications</p>
-              <p className="text-sm text-gray-600">
+              <p className="font-medium text-gray-900 dark:text-gray-50">Enable Notifications</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Receive email and app notifications
               </p>
             </div>
@@ -250,11 +250,11 @@ export const Profile: React.FC = () => {
       {/* Danger / Experimental Section */}
       <Card>
         <div className="flex items-center gap-2 mb-4">
-          <AlertTriangle className="h-5 w-5 text-yellow-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Developer / Agent Settings</h2>
+          <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Developer / Agent Settings</h2>
         </div>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-sm text-yellow-800">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
             Advanced settings for developers and agent integration will be available here in
             the future.
           </p>

@@ -69,20 +69,20 @@ export const Dashboard: React.FC = () => {
       {/* Welcome Section */}
       <div>
         {!isWalletConnected && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
-              <p className="text-yellow-800">
+              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <p className="text-yellow-800 dark:text-yellow-200">
                 Connect wallet to start creating disputes
               </p>
             </div>
           </div>
         )}
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
           Hi, {currentUser?.displayName || 'User'}
         </h1>
         {currentUser?.walletAddress && (
-          <p className="text-gray-600 mt-1">{currentUser.walletAddress}</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{currentUser.walletAddress}</p>
         )}
       </div>
 
@@ -91,39 +91,39 @@ export const Dashboard: React.FC = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Active Disputes</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Active Disputes</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">
                 {activeDisputes.length}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Clock className="h-6 w-6 text-blue-600" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+              <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </Card>
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Pending as Validator</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Pending as Validator</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">
                 {pendingValidatorDecisions.length}
               </p>
             </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <AlertCircle className="h-6 w-6 text-yellow-600" />
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+              <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
         </Card>
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Resolved</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Resolved</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">
                 {totalResolved}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </Card>
@@ -131,13 +131,13 @@ export const Dashboard: React.FC = () => {
 
       {/* Disputes List */}
       <Card>
-        <div className="flex border-b border-gray-200 mb-4">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
           <button
             onClick={() => setActiveTab('my-disputes')}
             className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'my-disputes'
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50'
             }`}
           >
             My Disputes
@@ -146,8 +146,8 @@ export const Dashboard: React.FC = () => {
             onClick={() => setActiveTab('as-validator')}
             className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
               activeTab === 'as-validator'
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400'
+                : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50'
             }`}
           >
             As Validator
@@ -156,7 +156,7 @@ export const Dashboard: React.FC = () => {
 
         {disputesToShow.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               {activeTab === 'my-disputes'
                 ? 'No disputes yet. Create your first dispute!'
                 : 'No disputes to validate.'}
@@ -176,20 +176,20 @@ export const Dashboard: React.FC = () => {
                 <Link
                   key={dispute.id}
                   to={`/dispute/${dispute.id}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-50">
                           {dispute.title}
                         </h3>
                         <Badge status={dispute.status}>
                           {dispute.status}
                         </Badge>
-                        <span className="text-sm text-gray-500">({role})</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">({role})</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                         <span>Stake: {dispute.stakeAmount} {dispute.token}</span>
                         <span>•</span>
                         <span>Deadline: {formatDeadline(dispute.deadline)}</span>

@@ -17,7 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800';
+  const baseStyles = 'font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 whitespace-nowrap';
   
   const variantStyles = {
     primary: 'bg-primary-600 dark:bg-primary-500 text-white hover:bg-primary-700 dark:hover:bg-primary-600 focus:ring-primary-500 disabled:bg-primary-300 dark:disabled:bg-primary-800',
@@ -39,6 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
         variantStyles[variant],
         sizeStyles[size],
         (disabled || isLoading) && 'cursor-not-allowed opacity-50',
+        'flex items-center justify-center',
         className
       )}
       disabled={disabled || isLoading}
@@ -69,7 +70,9 @@ export const Button: React.FC<ButtonProps> = ({
           Loading...
         </span>
       ) : (
-        children
+        <span className="flex items-center">
+          {children}
+        </span>
       )}
     </button>
   );

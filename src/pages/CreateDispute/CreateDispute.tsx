@@ -171,8 +171,8 @@ export const CreateDispute: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Dispute</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2">Create Dispute</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           Follow the steps below to create a new dispute, bet, or promise.
         </p>
       </div>
@@ -181,7 +181,7 @@ export const CreateDispute: React.FC = () => {
 
       <div className="mt-8">{renderStep()}</div>
 
-      <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+      <div className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
           variant="secondary"
           onClick={handleBack}

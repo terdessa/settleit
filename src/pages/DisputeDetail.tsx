@@ -52,7 +52,7 @@ export const DisputeDetail: React.FC = () => {
   if (!dispute) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">Loading dispute...</p>
+        <p className="text-gray-600 dark:text-gray-400">Loading dispute...</p>
       </div>
     );
   }
@@ -145,8 +145,8 @@ export const DisputeDetail: React.FC = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{dispute.title}</h1>
-            <p className="text-gray-600 mt-1">ID: {dispute.id}</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">{dispute.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">ID: {dispute.id}</p>
           </div>
           <Badge status={dispute.status}>{dispute.status}</Badge>
         </div>
@@ -165,32 +165,32 @@ export const DisputeDetail: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Overview Card */}
           <Card>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Overview</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Overview</h2>
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-600">Parties</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Parties</p>
                 <div className="mt-1 flex items-center gap-4">
                   <div>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 dark:text-gray-50">
                       {isCreator ? 'You' : 'Creator'}
                     </span>
-                    <span className="text-gray-600 ml-2">
+                    <span className="text-gray-600 dark:text-gray-400 ml-2">
                       ({dispute.stakeAmount} {dispute.token})
                     </span>
                   </div>
-                  <span className="text-gray-400">vs</span>
+                  <span className="text-gray-400 dark:text-gray-500">vs</span>
                   <div>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-gray-900 dark:text-gray-50">
                       {isOpponent ? 'You' : 'Opponent'}
                     </span>
-                    <span className="text-gray-600 ml-2">
+                    <span className="text-gray-600 dark:text-gray-400 ml-2">
                       ({dispute.opponentStakeAmount} {dispute.token})
                     </span>
                   </div>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Validator</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Validator</p>
                 <p className="mt-1 font-medium text-gray-900 dark:text-gray-100">
                   {dispute.validatorType === 'ai' 
                     ? 'AI Agent (SpoonOS)' 
@@ -198,34 +198,34 @@ export const DisputeDetail: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Staked</p>
-                <p className="mt-1 text-xl font-bold text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Staked</p>
+                <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-50">
                   {dispute.stakeAmount + dispute.opponentStakeAmount} {dispute.token}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Deadline</p>
-                <p className="mt-1 font-medium text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Deadline</p>
+                <p className="mt-1 font-medium text-gray-900 dark:text-gray-50">
                   {format(dispute.deadline, 'PPpp')} ({formatDistanceToNow(dispute.deadline, { addSuffix: true })})
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Type</p>
-                <p className="mt-1 font-medium text-gray-900">{dispute.type}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Type</p>
+                <p className="mt-1 font-medium text-gray-900 dark:text-gray-50">{dispute.type}</p>
               </div>
             </div>
           </Card>
 
           {/* Description */}
           <Card>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Description</h2>
-            <p className="text-gray-700 whitespace-pre-wrap">{dispute.description}</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Description</h2>
+            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{dispute.description}</p>
             {dispute.evidenceRequirements && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-sm font-medium text-gray-600 mb-2">
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                   Evidence Requirements
                 </p>
-                <p className="text-gray-700 whitespace-pre-wrap">
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                   {dispute.evidenceRequirements}
                 </p>
               </div>
@@ -235,7 +235,7 @@ export const DisputeDetail: React.FC = () => {
           {/* Evidence Section */}
           <Card>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Evidence</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Evidence</h2>
               {canAddEvidence && dispute.status !== 'Resolved' && (
                 <Button
                   variant="primary"
@@ -248,35 +248,35 @@ export const DisputeDetail: React.FC = () => {
               )}
             </div>
             {dispute.evidence.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">No evidence submitted yet.</p>
+              <p className="text-gray-600 dark:text-gray-400 text-center py-8">No evidence submitted yet.</p>
             ) : (
               <div className="space-y-4">
                 {dispute.evidence.map((evidence) => (
                   <div
                     key={evidence.id}
-                    className="p-4 border border-gray-200 rounded-lg"
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {getEvidenceIcon(evidence.type)}
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 dark:text-gray-50">
                           {evidence.type.charAt(0).toUpperCase() + evidence.type.slice(1)}
                         </span>
                       </div>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {format(evidence.timestamp, 'PPp')}
                       </span>
                     </div>
                     {evidence.description && (
-                      <p className="text-sm text-gray-600 mb-2">{evidence.description}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{evidence.description}</p>
                     )}
-                    <div className="text-gray-700">
+                    <div className="text-gray-700 dark:text-gray-300">
                       {evidence.type === 'link' ? (
                         <a
                           href={evidence.content}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary-600 hover:underline"
+                          className="text-primary-600 dark:text-primary-400 hover:underline"
                         >
                           {evidence.content}
                         </a>
@@ -284,7 +284,7 @@ export const DisputeDetail: React.FC = () => {
                         <p className="whitespace-pre-wrap">{evidence.content}</p>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                       Submitted by: {evidence.submittedBy === userId ? 'You' : evidence.submittedBy}
                     </p>
                   </div>
@@ -296,11 +296,11 @@ export const DisputeDetail: React.FC = () => {
           {/* Decision Section */}
           {dispute.status === 'Resolved' && dispute.decision ? (
             <Card>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Decision</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Decision</h2>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">Winner</p>
-                  <p className="mt-1 font-semibold text-green-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Winner</p>
+                  <p className="mt-1 font-semibold text-green-600 dark:text-green-400">
                     {dispute.decision.winner === 'creator'
                       ? isCreator
                         ? 'You (Creator)'
@@ -311,14 +311,14 @@ export const DisputeDetail: React.FC = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Reason</p>
-                  <p className="mt-1 text-gray-700 whitespace-pre-wrap">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Reason</p>
+                  <p className="mt-1 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                     {dispute.decision.reason}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Decided At</p>
-                  <p className="mt-1 text-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Decided At</p>
+                  <p className="mt-1 text-gray-700 dark:text-gray-300">
                     {format(dispute.decision.decidedAt, 'PPpp')}
                   </p>
                 </div>
@@ -326,7 +326,7 @@ export const DisputeDetail: React.FC = () => {
             </Card>
           ) : canMakeDecision ? (
             <Card>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Make Decision</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Make Decision</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Button
@@ -360,8 +360,8 @@ export const DisputeDetail: React.FC = () => {
             </Card>
           ) : (
             <Card>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Decision</h2>
-              <p className="text-gray-600">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Decision</h2>
+              <p className="text-gray-600 dark:text-gray-400">
                 {dispute.status === 'In Review'
                   ? 'Waiting for validator decision...'
                   : 'Decision pending...'}
@@ -375,12 +375,12 @@ export const DisputeDetail: React.FC = () => {
           {/* AI Agent Preview Panel */}
           <Card>
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">
+              <Sparkles className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">
                 AI Agent Insight
               </h2>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Coming soon: Powered by SpoonOS agents for AI-powered dispute analysis.
             </p>
             <Button
@@ -392,14 +392,14 @@ export const DisputeDetail: React.FC = () => {
               Simulate Agent Analysis
             </Button>
             {showAIAnalysis && aiAnalysis && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm font-medium text-blue-900 mb-2">
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">
                   Recommendation: {aiAnalysis.recommendation === 'creator' ? 'Creator' : 'Opponent'}
                 </p>
-                <p className="text-xs text-blue-700 mb-2">
+                <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
                   Confidence: {(aiAnalysis.confidence * 100).toFixed(0)}%
                 </p>
-                <p className="text-sm text-blue-800 whitespace-pre-wrap">
+                <p className="text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
                   {aiAnalysis.reasoning}
                 </p>
               </div>
@@ -476,18 +476,18 @@ export const DisputeDetail: React.FC = () => {
         size="md"
       >
         <div className="space-y-4">
-          <p className="text-gray-700">
+          <p className="text-gray-700 dark:text-gray-300">
             Are you sure you want to award the dispute to{' '}
             <strong>
               {decisionWinner === 'creator' ? 'the Creator' : 'the Opponent'}
             </strong>
             ?
           </p>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm font-medium text-gray-700 mb-2">Your Reason:</p>
-            <p className="text-gray-600 whitespace-pre-wrap">{decisionReason}</p>
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Your Reason:</p>
+            <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{decisionReason}</p>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             This decision is final and will trigger the payout automatically.
           </p>
           <div className="flex justify-end gap-3 pt-4">

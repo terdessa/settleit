@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImage from '../assets/logo/logo.png';
 
 export interface LogoProps {
   className?: string;
@@ -15,7 +16,7 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md' }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img
-        src="/logo.png"
+        src={logoImage}
         alt="Settleit Logo"
         className={sizeClasses[size]}
         onError={(e) => {
