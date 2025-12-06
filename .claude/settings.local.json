@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(.venvScriptspython.exe -c \"from spoon_ai import llm; print(dir(llm))\")",
+      "Bash(D:\\Projects\\settleit\\backend\\.venv\\Scripts\\python.exe:*)",
+      "Bash(git reset:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
