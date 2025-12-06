@@ -46,7 +46,15 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
-# API Keys - IMPORTANT!
+# API Keys - IMPORTANT! Never commit these!
+.env
+.env.*
+!.env.example
 backend/.env
+backend/.env.*
+!backend/.env.example
 .env.local
 .env.*.local
+
+# Claude Code settings
+.claude/
