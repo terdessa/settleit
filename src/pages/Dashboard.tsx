@@ -19,18 +19,17 @@ export const Dashboard: React.FC = () => {
     'my-disputes'
   );
 
+  const { fetchDisputes } = useDisputesStore();
+
   useEffect(() => {
-    // Initialize mock user and disputes
+    // Initialize mock user
     if (!currentUser) {
       const mockUser = getCurrentMockUser();
       setUser(mockUser);
     }
-    if (disputes.length === 0) {
-      const userId = currentUser?.id || 'user1';
-      const mockDisputes = generateMockDisputes(userId);
-      setDisputes(mockDisputes);
-    }
-  }, [currentUser, disputes.length, setUser, setDisputes]);
+    // Fetch disputes from API
+    fetchDisputes();
+  }, [currentUser, setUser, fetchDisputes]);
 
   const userId = currentUser?.id || 'user1';
   const myDisputes = getUserDisputes(userId);
@@ -87,45 +86,24 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Active Disputes</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">
-                {activeDisputes.length}
-              </p>
-            </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-              <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="p-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Active</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+            {activeDisputes.length}
+          </p>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Pending as Validator</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">
-                {pendingValidatorDecisions.length}
-              </p>
-            </div>
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
-              <AlertCircle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-            </div>
-          </div>
+        <Card className="p-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Pending</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+            {pendingValidatorDecisions.length}
+          </p>
         </Card>
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Resolved</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-2">
-                {totalResolved}
-              </p>
-            </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
+        <Card className="p-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Resolved</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+            {totalResolved}
+          </p>
         </Card>
       </div>
 
@@ -189,10 +167,16 @@ export const Dashboard: React.FC = () => {
                         </Badge>
                         <span className="text-sm text-gray-500 dark:text-gray-400">({role})</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <span>Stake: {dispute.stakeAmount} {dispute.token}</span>
+                      <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                        <span>{dispute.stakeAmount} {dispute.token}</span>
                         <span>•</span>
-                        <span>Deadline: {formatDeadline(dispute.deadline)}</span>
+                        <span>{dispute.type}</span>
+                        {dispute.deadline && (
+                          <>
+                            <span>•</span>
+                            <span>{formatDeadline(dispute.deadline)}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

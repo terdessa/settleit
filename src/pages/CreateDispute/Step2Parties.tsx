@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Select } from '../../components/ui';
+import { Input, Select, Textarea } from '../../components/ui';
 import { CreateDisputeForm } from '../../types';
 
 interface Step2PartiesProps {
@@ -19,30 +19,43 @@ export const Step2Parties: React.FC<Step2PartiesProps> = ({
     { value: 'TestToken', label: 'TestToken' },
   ];
 
-  return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">
-          Parties & Stakes
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Specify who you're challenging and the stake amounts.
-        </p>
-      </div>
+  const isBet = formData.type === 'Bet';
 
+  return (
+    <div className="space-y-4">
       <Input
-        label="Opponent Identifier"
-        placeholder="Wallet address or username"
+        label="Opponent"
+        placeholder="Wallet or username"
         value={formData.opponentIdentifier}
         onChange={(e) => onChange({ opponentIdentifier: e.target.value })}
         error={errors.opponentIdentifier}
-        helperText="Enter the wallet address or username of the person you're challenging."
         required
       />
 
-      <div className="grid grid-cols-2 gap-4">
+      {isBet && (
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Your Position"
+            placeholder="e.g., Fish can fly"
+            value={formData.creatorPosition || ''}
+            onChange={(e) => onChange({ creatorPosition: e.target.value })}
+            error={errors.creatorPosition}
+            required
+          />
+          <Input
+            label="Their Position"
+            placeholder="e.g., Fish cannot fly"
+            value={formData.opponentPosition || ''}
+            onChange={(e) => onChange({ opponentPosition: e.target.value })}
+            error={errors.opponentPosition}
+            required
+          />
+        </div>
+      )}
+
+      <div className="grid grid-cols-3 gap-4">
         <Input
-          label="Your Stake Amount"
+          label="Your Stake"
           type="number"
           min="0"
           step="0.01"
@@ -55,7 +68,7 @@ export const Step2Parties: React.FC<Step2PartiesProps> = ({
           required
         />
         <Input
-          label="Opponent Stake Amount"
+          label="Their Stake"
           type="number"
           min="0"
           step="0.01"
@@ -69,16 +82,15 @@ export const Step2Parties: React.FC<Step2PartiesProps> = ({
           error={errors.opponentStakeAmount}
           required
         />
+        <Select
+          label="Token"
+          options={tokenOptions}
+          value={formData.token}
+          onChange={(e) => onChange({ token: e.target.value })}
+          error={errors.token}
+          required
+        />
       </div>
-
-      <Select
-        label="Token"
-        options={tokenOptions}
-        value={formData.token}
-        onChange={(e) => onChange({ token: e.target.value })}
-        error={errors.token}
-        required
-      />
     </div>
   );
 };

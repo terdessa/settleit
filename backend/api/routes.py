@@ -113,11 +113,12 @@ async def analyze_dispute(request: AnalyzeDisputeRequest) -> AnalysisResponse:
         if not isinstance(agent_response, str):
             agent_response = str(agent_response)
 
+        # Return full agent response without truncation
         return AnalysisResponse(
             dispute_id=request.dispute_id,
             recommendation=None,  # Could parse from agent response
             confidence=0.0,
-            reasoning=agent_response,
+            reasoning=agent_response,  # Full response, no truncation
             evidence_scores={
                 "creator": 0.0,
                 "opponent": 0.0,
