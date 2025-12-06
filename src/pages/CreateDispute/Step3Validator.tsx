@@ -45,20 +45,20 @@ export const Step3Validator: React.FC<Step3ValidatorProps> = ({
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">
           Validator & Rules
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Choose a validator and set the rules for your dispute.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           Validator Type
         </label>
         <div className="space-y-3">
-          <label className="flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+          <label className="flex items-center p-4 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
             <input
               type="radio"
               name="validatorType"
@@ -68,10 +68,10 @@ export const Step3Validator: React.FC<Step3ValidatorProps> = ({
               className="h-4 w-4 text-primary-600 focus:ring-primary-500"
             />
             <div className="ml-3 flex-1">
-              <div className="font-medium text-gray-900">
+              <div className="font-medium text-gray-900 dark:text-gray-50">
                 Invite a human validator
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
                 Choose a trusted person to review and decide
               </div>
             </div>

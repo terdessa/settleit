@@ -27,10 +27,10 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">
           Dispute Basics
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Provide the essential information about your dispute.
         </p>
       </div>

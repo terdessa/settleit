@@ -26,7 +26,7 @@ export const Textarea: React.FC<TextareaProps> = ({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
         >
           {label}
         </label>
@@ -34,10 +34,10 @@ export const Textarea: React.FC<TextareaProps> = ({
       <textarea
         id={inputId}
         className={clsx(
-          'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-vertical',
+          'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-vertical bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100',
           error
-            ? 'border-red-500 focus:ring-red-500'
-            : 'border-gray-300',
+            ? 'border-red-500 dark:border-red-600 focus:ring-red-500'
+            : 'border-gray-300 dark:border-gray-600',
           className
         )}
         {...props}
@@ -46,18 +46,18 @@ export const Textarea: React.FC<TextareaProps> = ({
         <div className="mt-1 flex justify-between items-center">
           <div>
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             )}
             {helperText && !error && (
-              <p className="text-sm text-gray-500">{helperText}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{helperText}</p>
             )}
           </div>
           {characterCount !== undefined && maxLength && (
             <p className={clsx(
               'text-sm',
               characterCount > maxLength * 0.9
-                ? 'text-orange-600'
-                : 'text-gray-500'
+                ? 'text-orange-600 dark:text-orange-400'
+                : 'text-gray-500 dark:text-gray-400'
             )}>
               {characterCount} / {maxLength}
             </p>

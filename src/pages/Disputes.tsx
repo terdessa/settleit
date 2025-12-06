@@ -32,8 +32,8 @@ export const Disputes: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Disputes</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2">My Disputes</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           View all disputes where you are a party (creator or opponent).
         </p>
       </div>
@@ -41,8 +41,8 @@ export const Disputes: React.FC = () => {
       {userDisputes.length === 0 ? (
         <Card>
           <div className="text-center py-12">
-            <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No disputes found.</p>
+            <Clock className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400">No disputes found.</p>
           </div>
         </Card>
       ) : (
@@ -57,12 +57,12 @@ export const Disputes: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900">{dispute.title}</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-50">{dispute.title}</h3>
                         <Badge status={dispute.status}>{dispute.status}</Badge>
-                        <span className="text-sm text-gray-500">({role})</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">({role})</span>
                       </div>
-                      <p className="text-gray-600 mb-3">{dispute.type}</p>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                      <p className="text-gray-600 dark:text-gray-400 mb-3">{dispute.type}</p>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                         <span>
                           Stake: {dispute.stakeAmount} {dispute.token}
                         </span>
@@ -74,7 +74,7 @@ export const Disputes: React.FC = () => {
                       </div>
                     </div>
                     <div className="ml-4">
-                      <span className="text-sm font-medium text-primary-600">
+                      <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
                         View Details →
                       </span>
                     </div>

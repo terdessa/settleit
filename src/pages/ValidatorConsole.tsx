@@ -66,8 +66,8 @@ export const ValidatorConsole: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Validator Console</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2">Validator Console</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           Review and decide on disputes you've been assigned to validate.
         </p>
       </div>
@@ -87,7 +87,7 @@ export const ValidatorConsole: React.FC = () => {
         </div>
 
         {/* Status Tabs */}
-        <div className="flex border-b border-gray-200 mt-6 -mx-6 px-6">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mt-6 -mx-6 px-6">
           {statusTabs.map((tab) => {
             const count = getStatusCount(tab.value);
             return (
@@ -96,8 +96,8 @@ export const ValidatorConsole: React.FC = () => {
                 onClick={() => setFilterStatus(tab.value)}
                 className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors relative ${
                   filterStatus === tab.value
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    ? 'border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50'
                 }`}
               >
                 {tab.label}
@@ -105,8 +105,8 @@ export const ValidatorConsole: React.FC = () => {
                   <span
                     className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
                       filterStatus === tab.value
-                        ? 'bg-primary-100 text-primary-700'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     }`}
                   >
                     {count}
@@ -124,13 +124,13 @@ export const ValidatorConsole: React.FC = () => {
           <div className="text-center py-12">
             {searchQuery.trim() ? (
               <>
-                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No disputes found matching your search.</p>
+                <Search className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">No disputes found matching your search.</p>
               </>
             ) : (
               <>
-                <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">
+                <Clock className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">
                   {filterStatus === 'all'
                     ? 'No disputes assigned to you yet.'
                     : `No disputes with status "${filterStatus}".`}
@@ -151,10 +151,10 @@ export const ValidatorConsole: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-gray-900">{dispute.title}</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-50">{dispute.title}</h3>
                       <Badge status={dispute.status}>{dispute.status}</Badge>
                     </div>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
                       <span>
                         Parties: {dispute.creatorId.substring(0, 8)}... vs{' '}
                         {dispute.opponentId.substring(0, 8)}...
@@ -165,19 +165,19 @@ export const ValidatorConsole: React.FC = () => {
                         {dispute.token}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Clock className="h-4 w-4" />
                       <span>Deadline: {formatDistanceToNow(dispute.deadline, { addSuffix: true })}</span>
                     </div>
                     {dispute.evidence.length > 0 && (
-                      <div className="mt-3 text-sm text-gray-600">
+                      <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
                         {dispute.evidence.length} evidence item
                         {dispute.evidence.length !== 1 ? 's' : ''} submitted
                       </div>
                     )}
                   </div>
                   <div className="ml-4">
-                    <span className="text-sm font-medium text-primary-600">
+                    <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
                       Open Details →
                     </span>
                   </div>

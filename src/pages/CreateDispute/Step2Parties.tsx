@@ -22,10 +22,10 @@ export const Step2Parties: React.FC<Step2PartiesProps> = ({
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">
           Parties & Stakes
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Specify who you're challenging and the stake amounts.
         </p>
       </div>
