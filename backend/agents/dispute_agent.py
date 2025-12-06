@@ -15,25 +15,20 @@ from config import settings
 # System prompt for dispute analysis
 SYSTEM_PROMPT = """You are an impartial AI arbitrator for the SettleIt dispute resolution platform.
 
-Your role is to:
-1. Carefully analyze all evidence submitted by both parties
-2. Evaluate the credibility and relevance of each piece of evidence
-3. Consider the original terms and context of the dispute
-4. Provide a fair and well-reasoned recommendation
+**CRITICAL INSTRUCTIONS:**
+1. **DO NOT** pick a winner immediately - analyze both sides first
+2. Analyze each party's position and evidence separately
+3. If no evidence is provided, conduct your own research to determine the facts
+4. Only after thorough analysis, provide your final verdict
+5. Keep your response SHORT and CONCISE (max 300 words)
 
-Guidelines:
-- Be completely impartial - do not favor either party without evidence
-- Base your decision only on the evidence provided
-- Explain your reasoning clearly so both parties understand the decision
-- If evidence is insufficient, state what additional information would help
-- Consider the stake amount and ensure proportional analysis
+**Response Structure (in markdown):**
+1. **Creator's Side**: Brief analysis of their position/evidence
+2. **Opponent's Side**: Brief analysis of their position/evidence  
+3. **Research/Findings**: If no evidence, what you found through research
+4. **Verdict**: Final decision (creator or opponent) with brief reasoning
 
-Always structure your response with:
-- Summary of the dispute
-- Analysis of each party's evidence
-- Your recommendation (creator or opponent)
-- Confidence level (0-1)
-- Detailed reasoning for your decision
+Be impartial, concise, and base your verdict on facts and analysis, not assumptions.
 """
 
 
@@ -57,28 +52,38 @@ async def analyze_dispute(
     Analyze a dispute and provide a resolution recommendation.
     Uses SpoonOS ChatBot directly for LLM calls.
     """
-    prompt = f"""Please analyze the following dispute and provide your recommendation:
-
-## Dispute Information
-- **ID**: {dispute_id}
-- **Title**: {title}
-- **Description**: {description}
-- **Stake Amount**: {stake_amount}
-
+    has_evidence = len(creator_evidence) > 0 or len(opponent_evidence) > 0
+    
+    evidence_section = ""
+    if has_evidence:
+        evidence_section = f"""
 ## Evidence from Creator (Party A)
 {_format_evidence(creator_evidence)}
 
 ## Evidence from Opponent (Party B)
 {_format_evidence(opponent_evidence)}
+"""
+    else:
+        evidence_section = """
+**No evidence provided by either party.**
+You must conduct your own research to determine the facts and reach a verdict.
+"""
+    
+    prompt = f"""Analyze this dispute and provide a verdict:
 
-Please analyze all evidence carefully and provide your final recommendation with reasoning.
-Structure your response as:
-1. Summary of the dispute
-2. Analysis of creator's evidence
-3. Analysis of opponent's evidence
-4. Your recommendation (creator or opponent)
-5. Confidence level (0.0 to 1.0)
-6. Detailed reasoning
+**Dispute**: {title}
+**Description**: {description}
+**Stake**: {stake_amount}
+{evidence_section}
+
+**Instructions:**
+1. First analyze the Creator's side (position/evidence)
+2. Then analyze the Opponent's side (position/evidence)
+3. If no evidence was provided, conduct research to find the facts
+4. After analyzing both sides, provide your final verdict (creator or opponent)
+5. Keep your response under 300 words and be concise
+
+Format your response in markdown with clear sections for each side's analysis and the final verdict.
 """
 
     # Use ChatBot.ask() to get response from LLM

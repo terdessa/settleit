@@ -156,15 +156,17 @@ export const useSpoonOS = () => {
 
   /**
    * Legacy method for backward compatibility.
-   * Maps to the new submitForAnalysis with simplified interface.
+   * Note: This requires dispute data to be passed separately.
+   * For full integration, use submitForAnalysis directly.
    */
   const getAgentAnalysis = async (disputeId: string) => {
-    // This is a compatibility wrapper - in production, you'd fetch actual dispute data
-    console.log('getAgentAnalysis called for:', disputeId);
+    // This is a compatibility wrapper - returns a placeholder
+    // In production, components should use submitForAnalysis with full dispute data
+    console.warn('getAgentAnalysis: Use submitForAnalysis with full dispute data for real analysis');
     return {
       recommendation: 'creator' as const,
       confidence: 0.85,
-      reasoning: 'Analysis pending - connect to SpoonOS backend for real results',
+      reasoning: 'Use submitForAnalysis with full dispute data for real AI analysis',
       evidenceScore: {
         creator: 0.0,
         opponent: 0.0,
@@ -175,12 +177,13 @@ export const useSpoonOS = () => {
 
   /**
    * Legacy method for backward compatibility.
+   * Note: This is a placeholder. Use submitForAnalysis for real decisions.
    */
   const requestAgentDecision = async (disputeId: string) => {
-    console.log('requestAgentDecision called for:', disputeId);
+    console.warn('requestAgentDecision: Use submitForAnalysis for real AI decisions');
     return {
       decision: 'creator' as const,
-      reasoning: 'Decision pending - connect to SpoonOS backend for real results',
+      reasoning: 'Use submitForAnalysis with full dispute data for real AI decisions',
       timestamp: new Date(),
     };
   };

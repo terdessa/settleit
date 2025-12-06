@@ -18,56 +18,47 @@ export const Step1Basics: React.FC<Step1BasicsProps> = ({
   );
 
   const disputeTypeOptions = [
-    { value: 'Promise', label: 'Promise' },
-    { value: 'Bet', label: 'Bet' },
-    { value: 'Challenge', label: 'Challenge' },
-    { value: 'Other', label: 'Other' },
+    { value: 'Promise', label: 'Promise - 3rd validator (human or AI) with/without deadline' },
+    { value: 'Bet', label: 'Bet - Instant AI validator for immediate bets' },
   ];
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-2">
-          Dispute Basics
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Provide the essential information about your dispute.
-        </p>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="Title"
+          placeholder="What's the dispute about?"
+          value={formData.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          error={errors.title}
+          required
+        />
+
+        <Select
+          label="Type"
+          options={[
+            { value: 'Promise', label: 'Promise' },
+            { value: 'Bet', label: 'Bet' },
+          ]}
+          value={formData.type}
+          onChange={(e) => onChange({ type: e.target.value as DisputeType })}
+          error={errors.type}
+          required
+        />
       </div>
 
-      <Input
-        label="Dispute Title"
-        placeholder="e.g., Delivery Completion Promise"
-        value={formData.title}
-        onChange={(e) => onChange({ title: e.target.value })}
-        error={errors.title}
-        required
-      />
-
-      <Select
-        label="Dispute Type"
-        options={disputeTypeOptions}
-        value={formData.type}
-        onChange={(e) => onChange({ type: e.target.value as DisputeType })}
-        error={errors.type}
-        required
-      />
-
       <Textarea
-        label="Description"
-        placeholder="Describe the dispute, promise, bet, or challenge in detail..."
+        label="Description (Optional)"
+        placeholder="Brief description..."
         value={formData.description}
         onChange={(e) => {
           const value = e.target.value;
           setDescriptionLength(value.length);
           onChange({ description: value });
         }}
-        rows={6}
+        rows={3}
         error={errors.description}
-        characterCount={descriptionLength}
         maxLength={1000}
-        helperText="Provide clear details about what needs to be resolved."
-        required
       />
     </div>
   );

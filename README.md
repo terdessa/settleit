@@ -27,26 +27,47 @@ A modern, responsive web application frontend for Settleit, a platform where use
 ### Prerequisites
 
 - Node.js 18+ and npm
+- Python 3.10+ (for backend)
+- At least one LLM API key (Gemini, OpenAI, or Anthropic)
 
-### Installation
+### First Time Setup
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd settleit
+**1. Install Backend Dependencies:**
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 ```
 
-2. Install dependencies:
-```bash
+**2. Install Frontend Dependencies:**
+```powershell
 npm install
 ```
 
-3. Start the development server:
-```bash
+**3. Configure API Keys:**
+- Edit `backend/.env`
+- Add at least one: `GEMINI_API_KEY`, `OPENAI_API_KEY`, or `ANTHROPIC_API_KEY`
+
+### Running the Application
+
+**Terminal 1 - Start Backend:**
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn main:app --reload --port 8000
+```
+
+**Terminal 2 - Start Frontend:**
+```powershell
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+### Access the Application
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
 
 ### Building for Production
 
@@ -87,25 +108,33 @@ src/
 └── utils/           # Utility functions
 ```
 
+## Backend Integration
+
+The frontend is fully integrated with the SpoonOS backend:
+
+- **SpoonOS AI Analysis** - Real AI-powered dispute analysis via backend API
+- **Agent Status Checking** - Automatic detection of backend availability
+- **Evidence Analysis** - Submit disputes with evidence for AI evaluation
+
+The backend runs on `http://localhost:8000` and provides:
+- `/api/spoon/status` - Check agent configuration
+- `/api/spoon/analyze` - Full AI dispute analysis
+- `/api/spoon/quick-analysis` - Quick preliminary assessment
+
 ## Future Integrations
 
-This frontend is designed to easily integrate with:
-
 - **Neo Blockchain** - For on-chain dispute creation, stake locking, and automated payouts
-- **SpoonOS Agents** - For AI-powered dispute analysis and decision-making
-
-Integration hooks are already in place as placeholders in `src/hooks/`.
 
 ## Mock Data
 
-The application uses mock data for demonstration purposes. All disputes, users, and evidence are generated locally and reset on page refresh.
+The application uses mock data for dispute management (local state). AI analysis is powered by the real SpoonOS backend.
 
 ## Development Notes
 
-- All blockchain and agent integrations are placeholder implementations
+- SpoonOS backend integration is fully functional
 - Wallet connection is mocked (UI only)
-- No persistence - state resets on page refresh
-- Designed to be easily extended with real backend/blockchain integrations
+- Dispute state is in-memory (resets on page refresh)
+- AI analysis requires backend API keys to be configured
 
 ## License
 

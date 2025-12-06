@@ -6,17 +6,10 @@ AI-powered dispute resolution backend using SpoonOS agents.
 
 ### 1. Install Dependencies
 
-```bash
-# Using uv (recommended - faster)
-cd backend
-uv venv .venv
-uv pip install -r requirements.txt
-
-# OR using pip
+```powershell
 cd backend
 python -m venv .venv
-.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # Linux/Mac
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
@@ -34,12 +27,9 @@ cp .env.example .env
 
 ### 3. Run the Server
 
-```bash
-# From the backend directory
+```powershell
+# From the backend directory (with venv activated)
 python -m uvicorn main:app --reload --port 8000
-
-# OR from project root
-python -m backend.main
 ```
 
 ### 4. Verify Setup

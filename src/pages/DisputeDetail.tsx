@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { useDisputesStore } from '../store/disputesStore';
 import { useUserStore } from '../store/userStore';
 import { useUIStore } from '../store/uiStore';
@@ -24,14 +25,18 @@ import {
 export const DisputeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getDisputeById, updateDispute } = useDisputesStore();
+  const { getDisputeById, updateDispute, fetchDispute } = useDisputesStore();
   const { currentUser } = useUserStore();
   const { addToast } = useUIStore();
-  const { getAgentAnalysis, requestAgentDecision } = useSpoonOS();
+  const { submitForAnalysis, checkAgentStatus } = useSpoonOS();
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
   const [showDecisionModal, setShowDecisionModal] = useState(false);
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [agentStatus, setAgentStatus] = useState<any>(null);
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [selectedResolutionMethod, setSelectedResolutionMethod] = useState<'ai' | 'human' | null>(null);
   const [decisionWinner, setDecisionWinner] = useState<'creator' | 'opponent'>('creator');
   const [decisionReason, setDecisionReason] = useState('');
   const [newEvidence, setNewEvidence] = useState({
@@ -43,11 +48,31 @@ export const DisputeDetail: React.FC = () => {
   const dispute = id ? getDisputeById(id) : null;
 
   useEffect(() => {
-    if (!dispute && id) {
-      addToast('Dispute not found', 'error');
-      navigate('/dashboard');
+    if (id) {
+      if (!dispute) {
+        // Try to fetch from API
+        fetchDispute(id).then((fetched) => {
+          if (!fetched) {
+            addToast('Dispute not found', 'error');
+            navigate('/dashboard');
+          }
+        });
+      }
     }
-  }, [dispute, id, navigate, addToast]);
+  }, [id, dispute, fetchDispute, navigate, addToast]);
+
+  useEffect(() => {
+    // Check agent status on mount
+    const checkStatus = async () => {
+      try {
+        const status = await checkAgentStatus();
+        setAgentStatus(status);
+      } catch (error) {
+        console.error('Failed to check agent status:', error);
+      }
+    };
+    checkStatus();
+  }, [checkAgentStatus]);
 
   if (!dispute) {
     return (
@@ -91,10 +116,57 @@ export const DisputeDetail: React.FC = () => {
   };
 
   const handleSimulateAgentAnalysis = async () => {
-    const analysis = await getAgentAnalysis(dispute.id);
-    setAiAnalysis(analysis);
-    setShowAIAnalysis(true);
-    addToast('AI analysis generated (mock)', 'info');
+    try {
+      setIsLoadingAnalysis(true);
+      addToast('Requesting AI analysis...', 'info');
+      
+      // Convert evidence to the format expected by the API
+      const creatorEvidence = dispute.evidence
+        .filter(e => e.submittedBy === dispute.creatorId)
+        .map(e => ({
+          id: e.id,
+          type: e.type,
+          content: e.content,
+          submitted_by: 'creator' as const,
+        }));
+      
+      const opponentEvidence = dispute.evidence
+        .filter(e => e.submittedBy === dispute.opponentId)
+        .map(e => ({
+          id: e.id,
+          type: e.type,
+          content: e.content,
+          submitted_by: 'opponent' as const,
+        }));
+
+      const analysis = await submitForAnalysis(
+        dispute.id,
+        dispute.title,
+        dispute.description,
+        creatorEvidence,
+        opponentEvidence,
+        dispute.stakeAmount
+      );
+
+      // Transform API response to match component expectations
+      setAiAnalysis({
+        recommendation: analysis.recommendation || 'undecided',
+        confidence: analysis.confidence,
+        reasoning: analysis.reasoning,
+        evidenceScore: analysis.evidence_scores,
+        timestamp: new Date(),
+      });
+      setShowAIAnalysis(true);
+      addToast('AI analysis completed', 'success');
+    } catch (error: any) {
+      console.error('AI analysis failed:', error);
+      addToast(
+        error.message || 'Failed to get AI analysis. Make sure the backend is running and API keys are configured.',
+        'error'
+      );
+    } finally {
+      setIsLoadingAnalysis(false);
+    }
   };
 
   const handleSubmitDecision = () => {
@@ -140,188 +212,150 @@ export const DisputeDetail: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">{dispute.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">ID: {dispute.id}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{dispute.title}</h1>
+          <div className="flex items-center gap-3 mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <span>{dispute.type}</span>
+            <span>•</span>
+            <span>{dispute.stakeAmount + dispute.opponentStakeAmount} {dispute.token}</span>
+            {dispute.deadline && (
+              <>
+                <span>•</span>
+                <span>{formatDistanceToNow(dispute.deadline, { addSuffix: true })}</span>
+              </>
+            )}
           </div>
-          <Badge status={dispute.status}>{dispute.status}</Badge>
         </div>
-        <Timeline
-          status={dispute.status}
-          createdAt={dispute.createdAt}
-          fundedAt={dispute.fundedAt}
-          evidenceSubmittedAt={dispute.evidenceSubmittedAt}
-          inReviewAt={dispute.inReviewAt}
-          resolvedAt={dispute.resolvedAt}
-        />
+        <Badge status={dispute.status}>{dispute.status}</Badge>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Overview Card */}
-          <Card>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Overview</h2>
-            <div className="space-y-4">
+        <div className="lg:col-span-2 space-y-4">
+          {/* Quick Info */}
+          <Card className="p-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Parties</p>
-                <div className="mt-1 flex items-center gap-4">
-                  <div>
-                    <span className="font-medium text-gray-900 dark:text-gray-50">
-                      {isCreator ? 'You' : 'Creator'}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400 ml-2">
-                      ({dispute.stakeAmount} {dispute.token})
-                    </span>
-                  </div>
-                  <span className="text-gray-400 dark:text-gray-500">vs</span>
-                  <div>
-                    <span className="font-medium text-gray-900 dark:text-gray-50">
-                      {isOpponent ? 'You' : 'Opponent'}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400 ml-2">
-                      ({dispute.opponentStakeAmount} {dispute.token})
-                    </span>
-                  </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Parties</p>
+                <p className="text-gray-900 dark:text-gray-50">
+                  {isCreator ? 'You' : 'Creator'} ({dispute.stakeAmount} {dispute.token}) vs {isOpponent ? 'You' : 'Opponent'} ({dispute.opponentStakeAmount} {dispute.token})
+                </p>
+              </div>
+              {dispute.type === 'Bet' && (
+                <div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Positions</p>
+                  <p className="text-gray-900 dark:text-gray-50 text-xs">
+                    You: {dispute.creatorPosition || 'N/A'} | Them: {dispute.opponentPosition || 'N/A'}
+                  </p>
                 </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Validator</p>
-                <p className="mt-1 font-medium text-gray-900 dark:text-gray-100">
-                  {dispute.validatorType === 'ai' 
-                    ? 'AI Agent (SpoonOS)' 
-                    : dispute.validatorId || 'Not assigned'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Staked</p>
-                <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-50">
-                  {dispute.stakeAmount + dispute.opponentStakeAmount} {dispute.token}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Deadline</p>
-                <p className="mt-1 font-medium text-gray-900 dark:text-gray-50">
-                  {format(dispute.deadline, 'PPpp')} ({formatDistanceToNow(dispute.deadline, { addSuffix: true })})
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Type</p>
-                <p className="mt-1 font-medium text-gray-900 dark:text-gray-50">{dispute.type}</p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Description */}
-          <Card>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Description</h2>
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{dispute.description}</p>
-            {dispute.evidenceRequirements && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
-                  Evidence Requirements
-                </p>
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                  {dispute.evidenceRequirements}
-                </p>
-              </div>
-            )}
-          </Card>
-
-          {/* Evidence Section */}
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Evidence</h2>
-              {canAddEvidence && dispute.status !== 'Resolved' && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setShowEvidenceModal(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Evidence
-                </Button>
               )}
             </div>
-            {dispute.evidence.length === 0 ? (
-              <p className="text-gray-600 dark:text-gray-400 text-center py-8">No evidence submitted yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {dispute.evidence.map((evidence) => (
-                  <div
-                    key={evidence.id}
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
+          </Card>
+
+          {/* Description - Only show if provided */}
+          {dispute.description && dispute.description.trim() && (
+            <Card className="p-4">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-50 mb-2">Description</h2>
+              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{dispute.description}</p>
+            </Card>
+          )}
+
+          {/* Evidence Section - Only show if there's evidence or can add */}
+          {(dispute.evidence.length > 0 || (canAddEvidence && dispute.status !== 'Resolved')) && (
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Evidence</h2>
+                {canAddEvidence && dispute.status !== 'Resolved' && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setShowEvidenceModal(true)}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {getEvidenceIcon(evidence.type)}
-                        <span className="font-medium text-gray-900 dark:text-gray-50">
-                          {evidence.type.charAt(0).toUpperCase() + evidence.type.slice(1)}
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add
+                  </Button>
+                )}
+              </div>
+              {dispute.evidence.length === 0 ? (
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center py-4">No evidence yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {dispute.evidence.map((evidence) => (
+                    <div
+                      key={evidence.id}
+                      className="p-3 border border-gray-200 dark:border-gray-700 rounded bg-gray-50/50 dark:bg-gray-800/50"
+                    >
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          {getEvidenceIcon(evidence.type)}
+                          <span className="text-xs font-medium text-gray-900 dark:text-gray-50">
+                            {evidence.type}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            by {evidence.submittedBy === userId ? 'You' : evidence.submittedBy}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {format(evidence.timestamp, 'MMM d, HH:mm')}
                         </span>
                       </div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {format(evidence.timestamp, 'PPp')}
-                      </span>
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
+                        {evidence.type === 'link' ? (
+                          <a
+                            href={evidence.content}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 dark:text-primary-400 hover:underline"
+                          >
+                            {evidence.content}
+                          </a>
+                        ) : (
+                          <p className="whitespace-pre-wrap line-clamp-2">{evidence.content}</p>
+                        )}
+                      </div>
                     </div>
-                    {evidence.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{evidence.description}</p>
-                    )}
-                    <div className="text-gray-700 dark:text-gray-300">
-                      {evidence.type === 'link' ? (
-                        <a
-                          href={evidence.content}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-600 dark:text-primary-400 hover:underline"
-                        >
-                          {evidence.content}
-                        </a>
-                      ) : (
-                        <p className="whitespace-pre-wrap">{evidence.content}</p>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      Submitted by: {evidence.submittedBy === userId ? 'You' : evidence.submittedBy}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* Decision Section */}
           {dispute.status === 'Resolved' && dispute.decision ? (
-            <Card>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Decision</h2>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Winner</p>
-                  <p className="mt-1 font-semibold text-green-600 dark:text-green-400">
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-3">
+                {dispute.decision.decidedBy === 'ai-agent-spoonos' ? 'AI Analysis' : 'Decision'}
+              </h2>
+              {dispute.decision.winner && dispute.decision.decidedBy !== 'ai-agent-spoonos' && (
+                <div className="mb-3">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Winner</p>
+                  <p className="text-sm font-semibold text-green-600 dark:text-green-400">
                     {dispute.decision.winner === 'creator'
-                      ? isCreator
-                        ? 'You (Creator)'
-                        : 'Creator'
-                      : isOpponent
-                      ? 'You (Opponent)'
-                      : 'Opponent'}
+                      ? isCreator ? 'You' : 'Creator'
+                      : isOpponent ? 'You' : 'Opponent'}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Reason</p>
-                  <p className="mt-1 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                    {dispute.decision.reason}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Decided At</p>
-                  <p className="mt-1 text-gray-700 dark:text-gray-300">
-                    {format(dispute.decision.decidedAt, 'PPpp')}
-                  </p>
-                </div>
+              )}
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                <ReactMarkdown
+                  components={{
+                    h1: ({node, ...props}) => <h1 className="text-base font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-sm font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-xs font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
+                    p: ({node, ...props}) => <p className="mb-1.5 text-gray-700 dark:text-gray-300" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1.5 space-y-0.5 ml-3" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1.5 space-y-0.5 ml-3" {...props} />,
+                    li: ({node, ...props}) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-semibold text-gray-900 dark:text-gray-50" {...props} />,
+                    code: ({node, ...props}) => <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
+                    blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 dark:border-gray-600 pl-3 italic my-1.5 text-gray-600 dark:text-gray-400" {...props} />,
+                  }}
+                >
+                  {dispute.decision.reason}
+                </ReactMarkdown>
               </div>
             </Card>
           ) : canMakeDecision ? (
@@ -359,49 +393,130 @@ export const DisputeDetail: React.FC = () => {
               </div>
             </Card>
           ) : (
-            <Card>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-4">Decision</h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                {dispute.status === 'In Review'
-                  ? 'Waiting for validator decision...'
-                  : 'Decision pending...'}
-              </p>
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-3">Resolution</h2>
+              {dispute.status !== 'Resolved' && (isCreator || isOpponent) && (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={selectedResolutionMethod === 'ai' ? 'primary' : 'secondary'}
+                      onClick={async () => {
+                        if (selectedResolutionMethod === 'ai') {
+                          setIsResolving(true);
+                          try {
+                            const response = await fetch(`http://localhost:8000/api/disputes/${dispute.id}/resolve`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ method: 'ai' }),
+                            });
+                            if (response.ok) {
+                              await fetchDispute(dispute.id);
+                              addToast('Resolved with AI!', 'success');
+                              setSelectedResolutionMethod(null);
+                            } else {
+                              const error = await response.json();
+                              throw new Error(error.detail || 'Failed to resolve');
+                            }
+                          } catch (error: any) {
+                            addToast(error.message || 'Failed to resolve', 'error');
+                          } finally {
+                            setIsResolving(false);
+                          }
+                        } else {
+                          setSelectedResolutionMethod('ai');
+                        }
+                      }}
+                      disabled={isResolving || selectedResolutionMethod === 'human'}
+                      size="sm"
+                    >
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      {selectedResolutionMethod === 'ai' ? (isResolving ? 'Resolving...' : 'Confirm AI') : 'AI'}
+                    </Button>
+                    <Button
+                      variant={selectedResolutionMethod === 'human' ? 'primary' : 'secondary'}
+                      onClick={() => {
+                        if (selectedResolutionMethod === 'human') {
+                          addToast('Invite a validator to resolve', 'info');
+                          setSelectedResolutionMethod(null);
+                        } else {
+                          setSelectedResolutionMethod('human');
+                        }
+                      }}
+                      disabled={selectedResolutionMethod === 'ai'}
+                      size="sm"
+                    >
+                      {selectedResolutionMethod === 'human' ? 'Confirm Human' : 'Human'}
+                    </Button>
+                  </div>
+                  {selectedResolutionMethod && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setSelectedResolutionMethod(null)}
+                      className="w-full"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              )}
+              {dispute.status === 'In Review' && !isCreator && !isOpponent && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Waiting for resolution...
+                </p>
+              )}
             </Card>
           )}
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* AI Agent Preview Panel */}
-          <Card>
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">
-                AI Agent Insight
-              </h2>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">AI Analysis</h2>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Coming soon: Powered by SpoonOS agents for AI-powered dispute analysis.
-            </p>
+            {agentStatus && (
+              <div className="mb-3 p-2 rounded bg-gray-50 dark:bg-gray-800/50">
+                <span className={`text-xs font-semibold ${
+                  agentStatus.status === 'ready' 
+                    ? 'text-green-600 dark:text-green-400' 
+                    : 'text-yellow-600 dark:text-yellow-400'
+                }`}>
+                  {agentStatus.status === 'ready' ? '✓ Ready' : '⚠ Not Configured'}
+                </span>
+              </div>
+            )}
             <Button
               variant="secondary"
               size="sm"
               onClick={handleSimulateAgentAnalysis}
+              disabled={isLoadingAnalysis || agentStatus?.status !== 'ready'}
               className="w-full"
             >
-              Simulate Agent Analysis
+              {isLoadingAnalysis ? 'Analyzing...' : 'Get Analysis'}
             </Button>
             {showAIAnalysis && aiAnalysis && (
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">
-                  Recommendation: {aiAnalysis.recommendation === 'creator' ? 'Creator' : 'Opponent'}
-                </p>
-                <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
-                  Confidence: {(aiAnalysis.confidence * 100).toFixed(0)}%
-                </p>
-                <p className="text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
-                  {aiAnalysis.reasoning}
-                </p>
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                <div className="text-xs text-blue-800 dark:text-blue-200 max-h-[400px] overflow-y-auto">
+                  <ReactMarkdown
+                    components={{
+                      h1: ({node, ...props}) => <h1 className="text-sm font-bold mb-1 text-blue-900 dark:text-blue-100" {...props} />,
+                      h2: ({node, ...props}) => <h2 className="text-xs font-bold mb-1 text-blue-900 dark:text-blue-100" {...props} />,
+                      h3: ({node, ...props}) => <h3 className="text-xs font-bold mb-0.5 text-blue-900 dark:text-blue-100" {...props} />,
+                      p: ({node, ...props}) => <p className="mb-1 text-blue-800 dark:text-blue-200" {...props} />,
+                      ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1 space-y-0.5 ml-2" {...props} />,
+                      ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5 ml-2" {...props} />,
+                      li: ({node, ...props}) => <li className="text-blue-800 dark:text-blue-200" {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-semibold text-blue-900 dark:text-blue-100" {...props} />,
+                      code: ({node, ...props}) => <code className="bg-blue-100 dark:bg-blue-900/50 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
+                      blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-blue-300 dark:border-blue-700 pl-2 italic my-1 text-blue-700 dark:text-blue-300" {...props} />,
+                    }}
+                  >
+                    {aiAnalysis.reasoning}
+                  </ReactMarkdown>
+                </div>
               </div>
             )}
           </Card>

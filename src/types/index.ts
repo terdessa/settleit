@@ -1,8 +1,9 @@
 export type DisputeStatus = 'Draft' | 'Awaiting Funding' | 'In Review' | 'Resolved' | 'Cancelled';
-export type DisputeType = 'Promise' | 'Bet' | 'Challenge' | 'Other';
+export type DisputeType = 'Promise' | 'Bet';
 export type EvidenceType = 'text' | 'image' | 'link' | 'file';
 export type UserRole = 'user' | 'validator' | 'both';
 export type ValidatorType = 'human' | 'ai';
+export type ResolutionMethod = 'ai' | 'human';
 
 export interface User {
   id: string;
@@ -39,17 +40,20 @@ export interface Dispute {
   description: string;
   creatorId: string;
   opponentId: string;
+  creatorPosition?: string; // For Bet: what creator thinks (e.g., "fish can fly")
+  opponentPosition?: string; // For Bet: what opponent thinks (e.g., "fish cannot fly")
   validatorId?: string;
   validatorType: ValidatorType;
+  resolutionMethod?: ResolutionMethod; // How to resolve: 'ai' or 'human'
   status: DisputeStatus;
   stakeAmount: number;
   opponentStakeAmount: number;
   token: string;
-  deadline: Date;
+  deadline?: Date; // Optional for Promise, not used for Bet
   evidenceRequirements?: string;
   evidence: Evidence[];
   decision?: {
-    winner: 'creator' | 'opponent';
+    winner?: 'creator' | 'opponent'; // Optional - AI decisions don't have winners
     reason: string;
     decidedAt: Date;
     decidedBy: string;
@@ -66,11 +70,14 @@ export interface CreateDisputeForm {
   type: DisputeType;
   description: string;
   opponentIdentifier: string;
+  creatorPosition?: string; // For Bet: what creator thinks
+  opponentPosition?: string; // For Bet: what opponent thinks
   stakeAmount: number;
   opponentStakeAmount: number;
   token: string;
-  validatorType: ValidatorType;
-  validatorIdentifier?: string;
-  deadline: Date;
+  validatorType?: ValidatorType; // For Promise only
+  validatorIdentifier?: string; // For Promise only
+  deadline?: Date; // Optional for Promise
   evidenceRequirements?: string;
+  resolutionMethod?: ResolutionMethod; // 'ai' or 'human' - for both Promise and Bet
 }

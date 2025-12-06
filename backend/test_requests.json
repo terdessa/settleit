@@ -1,0 +1,219 @@
+{
+  "status_check": {
+    "endpoint": "GET /api/spoon/status",
+    "description": "Check if the SpoonOS agent is properly configured",
+    "url": "http://localhost:8000/api/spoon/status",
+    "method": "GET",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "expected_response": {
+      "status": "ready",
+      "provider": "gemini",
+      "model": "gemini-2.5-pro",
+      "message": "SpoonOS agent is configured and ready"
+    }
+  },
+  "analyze_dispute_basic": {
+    "endpoint": "POST /api/spoon/analyze",
+    "description": "Basic dispute analysis with minimal evidence",
+    "url": "http://localhost:8000/api/spoon/analyze",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "dispute_id": "dispute_test_001",
+      "title": "Delivery Delay Dispute",
+      "description": "The creator claims the delivery was delayed by 2 weeks, while the opponent states it was delivered on time according to the tracking information.",
+      "creator_evidence": [
+        {
+          "id": "evid_001",
+          "type": "text",
+          "content": "I ordered the package on January 1st with promised delivery on January 5th, but it didn't arrive until January 19th.",
+          "submitted_by": "creator"
+        }
+      ],
+      "opponent_evidence": [
+        {
+          "id": "evid_002",
+          "type": "link",
+          "content": "https://tracking.example.com/package/12345",
+          "submitted_by": "opponent"
+        }
+      ],
+      "stake_amount": 100.0
+    }
+  },
+  "analyze_dispute_complex": {
+    "endpoint": "POST /api/spoon/analyze",
+    "description": "Complex dispute with multiple evidence types",
+    "url": "http://localhost:8000/api/spoon/analyze",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "dispute_id": "dispute_test_002",
+      "title": "Service Quality Dispute",
+      "description": "The creator paid for premium service but claims the quality was substandard. The opponent argues that the service met all agreed-upon specifications.",
+      "creator_evidence": [
+        {
+          "id": "evid_003",
+          "type": "text",
+          "content": "The service contract clearly states 'premium quality' but the delivered work shows basic quality standards.",
+          "submitted_by": "creator"
+        },
+        {
+          "id": "evid_004",
+          "type": "image",
+          "content": "https://example.com/images/service-quality-comparison.jpg",
+          "submitted_by": "creator"
+        },
+        {
+          "id": "evid_005",
+          "type": "document",
+          "content": "https://example.com/documents/original-contract.pdf",
+          "submitted_by": "creator"
+        }
+      ],
+      "opponent_evidence": [
+        {
+          "id": "evid_006",
+          "type": "text",
+          "content": "The service was delivered according to the specifications in section 3.2 of the contract.",
+          "submitted_by": "opponent"
+        },
+        {
+          "id": "evid_007",
+          "type": "document",
+          "content": "https://example.com/documents/delivery-checklist.pdf",
+          "submitted_by": "opponent"
+        }
+      ],
+      "stake_amount": 500.0
+    }
+  },
+  "analyze_dispute_no_evidence": {
+    "endpoint": "POST /api/spoon/analyze",
+    "description": "Dispute with no evidence submitted yet",
+    "url": "http://localhost:8000/api/spoon/analyze",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "dispute_id": "dispute_test_003",
+      "title": "Payment Dispute",
+      "description": "The creator claims payment was not received, while the opponent shows proof of payment.",
+      "creator_evidence": [],
+      "opponent_evidence": [],
+      "stake_amount": 250.0
+    }
+  },
+  "quick_analysis": {
+    "endpoint": "POST /api/spoon/quick-analysis",
+    "description": "Quick preliminary analysis for UI feedback",
+    "url": "http://localhost:8000/api/spoon/quick-analysis",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "dispute_id": "dispute_test_004",
+      "title": "Contract Breach Dispute",
+      "description": "Disagreement over whether contract terms were violated.",
+      "creator_evidence": [
+        {
+          "id": "evid_008",
+          "type": "text",
+          "content": "Contract violation evidence 1",
+          "submitted_by": "creator"
+        },
+        {
+          "id": "evid_009",
+          "type": "text",
+          "content": "Contract violation evidence 2",
+          "submitted_by": "creator"
+        }
+      ],
+      "opponent_evidence": [
+        {
+          "id": "evid_010",
+          "type": "text",
+          "content": "Contract compliance evidence",
+          "submitted_by": "opponent"
+        }
+      ],
+      "stake_amount": 1000.0
+    },
+    "expected_response": {
+      "dispute_id": "dispute_test_004",
+      "preliminary_leaning": "creator",
+      "creator_evidence_count": 2,
+      "opponent_evidence_count": 1,
+      "message": "This is a preliminary assessment. Full analysis pending."
+    }
+  },
+  "analyze_dispute_high_stakes": {
+    "endpoint": "POST /api/spoon/analyze",
+    "description": "High-stakes dispute with substantial evidence",
+    "url": "http://localhost:8000/api/spoon/analyze",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "dispute_id": "dispute_test_005",
+      "title": "Intellectual Property Dispute",
+      "description": "The creator claims the opponent used their proprietary code without permission. The opponent argues the code was independently developed.",
+      "creator_evidence": [
+        {
+          "id": "evid_011",
+          "type": "document",
+          "content": "https://example.com/documents/original-code-repository.pdf",
+          "submitted_by": "creator"
+        },
+        {
+          "id": "evid_012",
+          "type": "link",
+          "content": "https://github.com/creator/original-repo",
+          "submitted_by": "creator"
+        },
+        {
+          "id": "evid_013",
+          "type": "text",
+          "content": "Code similarity analysis showing 85% match between repositories",
+          "submitted_by": "creator"
+        },
+        {
+          "id": "evid_014",
+          "type": "document",
+          "content": "https://example.com/documents/copyright-registration.pdf",
+          "submitted_by": "creator"
+        }
+      ],
+      "opponent_evidence": [
+        {
+          "id": "evid_015",
+          "type": "document",
+          "content": "https://example.com/documents/development-timeline.pdf",
+          "submitted_by": "opponent"
+        },
+        {
+          "id": "evid_016",
+          "type": "text",
+          "content": "Independent development logs showing parallel development",
+          "submitted_by": "opponent"
+        },
+        {
+          "id": "evid_017",
+          "type": "link",
+          "content": "https://example.com/expert-analysis",
+          "submitted_by": "opponent"
+        }
+      ],
+      "stake_amount": 10000.0
+    }
+  }
+}
