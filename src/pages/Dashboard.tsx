@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useDisputesStore } from '../store/disputesStore';
-import { generateMockDisputes, getCurrentMockUser } from '../mock';
+import { getCurrentMockUser } from '../mock';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { DisputeStatus } from '../types';
-import { Plus, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useWallet } from '../hooks';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, setUser, isWalletConnected } = useUserStore();
-  const { disputes, setDisputes, getUserDisputes, getValidatorDisputes } =
+  const { currentUser, setUser } = useUserStore();
+  const { account } = useWallet();
+  const { disputes, getUserDisputes, getValidatorDisputes } =
     useDisputesStore();
   const [activeTab, setActiveTab] = useState<'my-disputes' | 'as-validator'>(
     'my-disputes'
@@ -43,19 +44,6 @@ export const Dashboard: React.FC = () => {
   );
   const totalResolved = disputes.filter((d) => d.status === 'Resolved').length;
 
-  const getStatusColor = (status: DisputeStatus) => {
-    switch (status) {
-      case 'Resolved':
-        return 'success';
-      case 'In Review':
-        return 'info';
-      case 'Awaiting Funding':
-        return 'warning';
-      default:
-        return 'default';
-    }
-  };
-
   const formatDeadline = (date: Date) => {
     return formatDistanceToNow(date, { addSuffix: true });
   };
@@ -67,7 +55,7 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div>
-        {!isWalletConnected && (
+        {!account && (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
@@ -80,8 +68,10 @@ export const Dashboard: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
           Hi, {currentUser?.displayName || 'User'}
         </h1>
-        {currentUser?.walletAddress && (
-          <p className="text-gray-600 dark:text-gray-400 mt-1">{currentUser.walletAddress}</p>
+        {(account?.address || currentUser?.walletAddress) && (
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            {account?.address || currentUser?.walletAddress}
+          </p>
         )}
       </div>
 
@@ -112,21 +102,19 @@ export const Dashboard: React.FC = () => {
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
           <button
             onClick={() => setActiveTab('my-disputes')}
-            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'my-disputes'
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === 'my-disputes'
                 ? 'border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400'
                 : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50'
-            }`}
+              }`}
           >
             My Disputes
           </button>
           <button
             onClick={() => setActiveTab('as-validator')}
-            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
-              activeTab === 'as-validator'
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === 'as-validator'
                 ? 'border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400'
                 : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50'
-            }`}
+              }`}
           >
             As Validator
           </button>
@@ -147,8 +135,8 @@ export const Dashboard: React.FC = () => {
               const role = isCreator
                 ? 'Creator'
                 : dispute.validatorId === userId
-                ? 'Validator'
-                : 'Opponent';
+                  ? 'Validator'
+                  : 'Opponent';
 
               return (
                 <Link

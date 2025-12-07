@@ -11,7 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Search, Clock } from 'lucide-react';
 
 export const ValidatorConsole: React.FC = () => {
-  const { disputes, setDisputes, getValidatorDisputes, filterDisputes } =
+  const { disputes, setDisputes, getValidatorDisputes } =
     useDisputesStore();
   const { currentUser, setUser } = useUserStore();
   const [filterStatus, setFilterStatus] = useState<DisputeStatus | 'all'>('all');
@@ -94,20 +94,18 @@ export const ValidatorConsole: React.FC = () => {
               <button
                 key={tab.value}
                 onClick={() => setFilterStatus(tab.value)}
-                className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors relative ${
-                  filterStatus === tab.value
+                className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors relative ${filterStatus === tab.value
                     ? 'border-primary-600 dark:border-primary-500 text-primary-600 dark:text-primary-400'
                     : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-50'
-                }`}
+                  }`}
               >
                 {tab.label}
                 {count > 0 && (
                   <span
-                    className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                      filterStatus === tab.value
+                    className={`ml-2 px-2 py-0.5 rounded-full text-xs ${filterStatus === tab.value
                         ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                    }`}
+                      }`}
                   >
                     {count}
                   </span>
@@ -167,7 +165,11 @@ export const ValidatorConsole: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Clock className="h-4 w-4" />
-                      <span>Deadline: {formatDistanceToNow(dispute.deadline, { addSuffix: true })}</span>
+                      <span>
+                        {dispute.deadline
+                          ? `Deadline: ${formatDistanceToNow(dispute.deadline, { addSuffix: true })}`
+                          : 'No deadline'}
+                      </span>
                     </div>
                     {dispute.evidence.length > 0 && (
                       <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">

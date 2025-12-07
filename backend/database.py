@@ -8,6 +8,13 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent / "settleit.db"
 
 
+async def _ensure_column(db: aiosqlite.Connection, table: str, column: str, definition: str) -> None:
+    cursor = await db.execute(f"PRAGMA table_info({table})")
+    existing = [row[1] for row in await cursor.fetchall()]
+    if column not in existing:
+        await db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+
 async def init_db():
     """Initialize the database with required tables."""
     async with aiosqlite.connect(DB_PATH) as db:
@@ -38,9 +45,20 @@ async def init_db():
                 decision_winner TEXT,
                 decision_reason TEXT,
                 decision_decided_at TEXT,
-                decision_decided_by TEXT
+                decision_decided_by TEXT,
+                creator_wallet TEXT,
+                opponent_wallet TEXT,
+                escrow_tx_id TEXT,
+                payout_tx_id TEXT,
+                neofs_object_id TEXT
             )
         """)
+
+        await _ensure_column(db, "disputes", "creator_wallet", "TEXT")
+        await _ensure_column(db, "disputes", "opponent_wallet", "TEXT")
+        await _ensure_column(db, "disputes", "escrow_tx_id", "TEXT")
+        await _ensure_column(db, "disputes", "payout_tx_id", "TEXT")
+        await _ensure_column(db, "disputes", "neofs_object_id", "TEXT")
         
         # Evidence table
         await db.execute("""
@@ -85,8 +103,9 @@ async def create_dispute(dispute_data: Dict[str, Any]) -> str:
                 id, title, type, description, creator_id, opponent_id,
                 creator_position, opponent_position, validator_id, validator_type,
                 status, stake_amount, opponent_stake_amount, token, deadline,
-                evidence_requirements, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                evidence_requirements, created_at, creator_wallet, opponent_wallet,
+                escrow_tx_id, payout_tx_id, neofs_object_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             dispute_data['id'],
             dispute_data['title'],
@@ -105,6 +124,11 @@ async def create_dispute(dispute_data: Dict[str, Any]) -> str:
             dispute_data.get('deadline'),
             dispute_data.get('evidence_requirements'),
             dispute_data['created_at'],
+            dispute_data.get('creator_wallet'),
+            dispute_data.get('opponent_wallet'),
+            dispute_data.get('escrow_tx_id'),
+            dispute_data.get('payout_tx_id'),
+            dispute_data.get('neofs_object_id'),
         ))
         await db.commit()
         return dispute_data['id']

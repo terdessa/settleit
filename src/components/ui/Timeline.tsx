@@ -5,7 +5,6 @@ import { clsx } from 'clsx';
 
 export interface TimelineProps {
   status: DisputeStatus;
-  createdAt: Date;
   fundedAt?: Date;
   evidenceSubmittedAt?: Date;
   inReviewAt?: Date;
@@ -22,7 +21,6 @@ const timelineSteps = [
 
 export const Timeline: React.FC<TimelineProps> = ({
   status,
-  createdAt,
   fundedAt,
   evidenceSubmittedAt,
   inReviewAt,
@@ -80,11 +78,11 @@ export const Timeline: React.FC<TimelineProps> = ({
                   className={clsx(
                     'flex items-center justify-center w-8 h-8 rounded-full transition-colors',
                     stepStatus === 'completed' &&
-                      'bg-green-500 text-white',
+                    'bg-green-500 text-white',
                     stepStatus === 'current' &&
-                      'bg-primary-600 text-white animate-pulse',
+                    'bg-primary-600 text-white animate-pulse',
                     stepStatus === 'pending' &&
-                      'bg-gray-200 text-gray-400'
+                    'bg-gray-200 text-gray-400'
                   )}
                 >
                   {stepStatus === 'completed' ? (

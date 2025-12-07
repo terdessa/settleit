@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Select, Textarea } from '../../components/ui';
+import { Input, Select } from '../../components/ui';
 import { CreateDisputeForm } from '../../types';
 
 interface Step2PartiesProps {
@@ -30,6 +30,15 @@ export const Step2Parties: React.FC<Step2PartiesProps> = ({
         onChange={(e) => onChange({ opponentIdentifier: e.target.value })}
         error={errors.opponentIdentifier}
         required
+      />
+
+      <Input
+        label="Opponent Wallet Address"
+        placeholder="NXXXXXXXXXXXX"
+        value={formData.opponentWalletAddress || ''}
+        onChange={(e) => onChange({ opponentWalletAddress: e.target.value })}
+        error={errors.opponentWalletAddress}
+        helperText="Needed to lock funds on Neo"
       />
 
       {isBet && (

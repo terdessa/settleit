@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
+import { useWallet } from '../hooks';
 import { useUIStore } from '../store/uiStore';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui/Button';
@@ -23,8 +24,8 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { currentUser, isWalletConnected, connectWallet, disconnectWallet } = useUserStore();
+  const { setWalletAddress } = useUserStore();
+  const { account, connect, disconnect, isConnecting, isNeoLineAvailable, refreshAvailability } = useWallet();
   const { theme, toggleTheme } = useUIStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -36,12 +37,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   ];
 
   const handleWalletConnect = async () => {
-    if (isWalletConnected) {
-      disconnectWallet();
+    if (account) {
+      disconnect();
+      setWalletAddress(undefined);
       useUIStore.getState().addToast('Wallet disconnected', 'info');
-    } else {
-      connectWallet();
-      useUIStore.getState().addToast('Wallet connected (mock)', 'success');
+      return;
+    }
+
+    const available = refreshAvailability();
+    if (!available) {
+      useUIStore.getState().addToast('Install the NeoLine N3 wallet to connect', 'error');
+      return;
+    }
+
+    try {
+      const address = await connect();
+      setWalletAddress(address);
+      useUIStore.getState().addToast('Wallet connected', 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to connect wallet';
+      useUIStore.getState().addToast(message, 'error');
     }
   };
 
@@ -71,11 +86,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive(item.path)
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(item.path)
                         ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     {item.label}
@@ -98,14 +112,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 )}
               </button>
               <Button
-                variant={isWalletConnected ? 'secondary' : 'primary'}
+                variant={account ? 'secondary' : 'primary'}
                 size="sm"
                 onClick={handleWalletConnect}
+                disabled={isConnecting}
               >
                 <Wallet className="h-4 w-4 mr-2" />
-                {isWalletConnected
-                  ? `${currentUser?.walletAddress?.substring(0, 6)}...${currentUser?.walletAddress?.substring(currentUser.walletAddress.length - 4)}`
-                  : 'Connect Wallet'}
+                {account
+                  ? `${account.address.substring(0, 6)}...${account.address.substring(account.address.length - 4)}`
+                  : isConnecting
+                    ? 'Connecting...'
+                    : 'Connect Wallet'}
               </Button>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -133,11 +150,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium ${
-                      isActive(item.path)
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium ${isActive(item.path)
                         ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
+                      }`}
                   >
                     <Icon className="h-5 w-5" />
                     {item.label}

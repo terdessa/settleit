@@ -5,7 +5,6 @@ import { useUserStore } from '../store/userStore';
 import { generateMockDisputes, getCurrentMockUser } from '../mock';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { DisputeStatus } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import { Clock } from 'lucide-react';
 
@@ -66,11 +65,15 @@ export const Disputes: React.FC = () => {
                         <span>
                           Stake: {dispute.stakeAmount} {dispute.token}
                         </span>
-                        <span>•</span>
-                        <span>
-                          <Clock className="h-4 w-4 inline mr-1" />
-                          Deadline: {formatDistanceToNow(dispute.deadline, { addSuffix: true })}
-                        </span>
+                        {dispute.deadline && (
+                          <>
+                            <span>•</span>
+                            <span>
+                              <Clock className="h-4 w-4 inline mr-1" />
+                              Deadline: {formatDistanceToNow(dispute.deadline, { addSuffix: true })}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="ml-4">

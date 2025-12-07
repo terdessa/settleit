@@ -93,7 +93,7 @@ export const Step4Review: React.FC<Step4ReviewProps> = ({ formData }) => {
               <div className="flex justify-between">
                 <span className="text-gray-600 dark:text-gray-400">Deadline:</span>
                 <span className="font-medium text-gray-900 dark:text-gray-50">
-                  {format(formData.deadline, 'PPpp')}
+                  {formData.deadline ? format(formData.deadline, 'PPpp') : 'No deadline'}
                 </span>
               </div>
             </div>

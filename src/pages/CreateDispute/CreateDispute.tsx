@@ -5,11 +5,10 @@ import { Button } from '../../components/ui';
 import { Step1Basics } from './Step1Basics';
 import { Step2Parties } from './Step2Parties';
 import { Step3Validator } from './Step3Validator';
-import { Step4Review } from './Step4Review';
-import { CreateDisputeForm, Dispute, DisputeStatus } from '../../types';
+import { CreateDisputeForm } from '../../types';
 import { useDisputesStore } from '../../store/disputesStore';
-import { useUserStore } from '../../store/userStore';
 import { useUIStore } from '../../store/uiStore';
+import { useWallet, useNeoIntegration } from '../../hooks';
 
 const steps = ['Quick Setup', 'Optional Settings'];
 
@@ -18,6 +17,7 @@ const initialFormData: CreateDisputeForm = {
   type: 'Promise',
   description: '',
   opponentIdentifier: '',
+  opponentWalletAddress: '',
   stakeAmount: 0,
   opponentStakeAmount: 0,
   token: 'GAS',
@@ -32,9 +32,12 @@ export const CreateDispute: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<CreateDisputeForm>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOnChainPending, setIsOnChainPending] = useState(false);
   const { fetchDisputes } = useDisputesStore();
-  const { currentUser } = useUserStore();
   const { addToast } = useUIStore();
+  const { account } = useWallet();
+  const { createBetOnChain } = useNeoIntegration();
 
   const updateFormData = (data: Partial<CreateDisputeForm>) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -57,6 +60,9 @@ export const CreateDispute: React.FC = () => {
       }
       if (!formData.opponentIdentifier.trim()) {
         newErrors.opponentIdentifier = 'Opponent is required';
+      }
+      if (isBet && !formData.opponentWalletAddress?.trim()) {
+        newErrors.opponentWalletAddress = 'Opponent wallet is required for bets';
       }
       if (formData.stakeAmount <= 0) {
         newErrors.stakeAmount = 'Stake must be greater than 0';
@@ -109,7 +115,13 @@ export const CreateDispute: React.FC = () => {
       return;
     }
 
+    if (formData.type === 'Bet' && !account) {
+      addToast('Connect your Neo wallet before creating an on-chain bet.', 'error');
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       // Create dispute via API
       const response = await fetch('http://localhost:8000/api/disputes/', {
         method: 'POST',
@@ -121,6 +133,7 @@ export const CreateDispute: React.FC = () => {
           type: formData.type,
           description: formData.description,
           opponent_id: formData.opponentIdentifier,
+          opponent_wallet: formData.opponentWalletAddress,
           creator_position: formData.creatorPosition,
           opponent_position: formData.opponentPosition,
           stake_amount: formData.stakeAmount,
@@ -131,6 +144,7 @@ export const CreateDispute: React.FC = () => {
           deadline: formData.deadline ? formData.deadline.toISOString() : undefined,
           evidence_requirements: formData.evidenceRequirements,
           resolution_method: formData.resolutionMethod || (formData.type === 'Bet' ? 'ai' : 'human'),
+          creator_wallet: account?.address,
         }),
       });
 
@@ -139,7 +153,27 @@ export const CreateDispute: React.FC = () => {
       }
 
       const createdDispute = await response.json();
-      
+
+      if (formData.type === 'Bet' && account) {
+        setIsOnChainPending(true);
+        try {
+          const txid = await createBetOnChain({
+            disputeId: createdDispute.id,
+            creatorStake: formData.stakeAmount,
+            opponentStake: formData.opponentStakeAmount,
+            token: formData.token,
+            opponentAddress: formData.opponentWalletAddress || formData.opponentIdentifier,
+            neofsObjectId: createdDispute.neofs_object_id || createdDispute.id,
+          });
+          addToast(`On-chain escrow submitted (tx: ${txid.substring(0, 10)}...)`, 'success');
+        } catch (chainError) {
+          console.error('Failed to submit on-chain escrow:', chainError);
+          addToast('Dispute saved, but on-chain escrow failed. Retry from the dispute page.', 'error');
+        } finally {
+          setIsOnChainPending(false);
+        }
+      }
+
       // If Bet with AI resolution, immediately resolve
       if (formData.type === 'Bet' && formData.resolutionMethod === 'ai') {
         try {
@@ -152,9 +186,9 @@ export const CreateDispute: React.FC = () => {
               method: 'ai',
             }),
           });
-          
+
           if (resolveResponse.ok) {
-            const resolved = await resolveResponse.json();
+            await resolveResponse.json();
             addToast('Bet resolved instantly with AI!', 'success');
             // Refresh disputes
             await fetchDisputes();
@@ -173,6 +207,8 @@ export const CreateDispute: React.FC = () => {
     } catch (error: any) {
       console.error('Failed to create dispute:', error);
       addToast(error.message || 'Failed to create dispute. Make sure the backend is running.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -232,16 +268,16 @@ export const CreateDispute: React.FC = () => {
         <div className="flex gap-3 ml-auto">
           {currentStep < steps.length ? (
             <>
-              <Button variant="secondary" onClick={handleSubmit}>
+              <Button variant="secondary" onClick={handleSubmit} disabled={isSubmitting}>
                 Skip & Create
               </Button>
-              <Button variant="primary" onClick={handleNext}>
+              <Button variant="primary" onClick={handleNext} disabled={isSubmitting}>
                 Next
               </Button>
             </>
           ) : (
-            <Button variant="primary" onClick={handleSubmit}>
-              Create Dispute
+            <Button variant="primary" onClick={handleSubmit} disabled={isSubmitting || isOnChainPending}>
+              {isSubmitting || isOnChainPending ? 'Processing...' : 'Create Dispute'}
             </Button>
           )}
         </div>
