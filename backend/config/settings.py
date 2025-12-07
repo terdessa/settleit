@@ -25,6 +25,15 @@ class Settings:
     WEB3_PROVIDER_URL: str = os.getenv("WEB3_PROVIDER_URL", "")
     PRIVATE_KEY: str = os.getenv("PRIVATE_KEY", "")
 
+    # Neo / NeoFS Configuration
+    NEO_RPC_URL: str = os.getenv("NEO_RPC_URL", "https://n3seed2.ngd.network:20332")
+    NEO_NETWORK_MAGIC: int = int(os.getenv("NEO_NETWORK_MAGIC", "894710606"))
+    NEO_ESCROW_CONTRACT_HASH: str = os.getenv("NEO_ESCROW_CONTRACT_HASH", "")
+    NEO_ORACLE_WIF: str = os.getenv("NEO_ORACLE_WIF", "")
+    NEOFS_GATEWAY_URL: str = os.getenv("NEOFS_GATEWAY_URL", "")
+    NEOFS_CONTAINER_ID: str = os.getenv("NEOFS_CONTAINER_ID", "")
+    NEOFS_WALLET_WIF: str = os.getenv("NEOFS_WALLET_WIF", "")
+
     # Server Configuration
     API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
     API_PORT: int = int(os.getenv("API_PORT", "8000"))

@@ -9,7 +9,6 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { Timeline } from '../components/ui/Timeline';
 import { Input, Textarea, Select } from '../components/ui';
 import { Evidence, EvidenceType } from '../types';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -86,9 +85,15 @@ export const DisputeDetail: React.FC = () => {
   const isCreator = dispute.creatorId === userId;
   const isOpponent = dispute.opponentId === userId;
   const isValidator = dispute.validatorType === 'human' && dispute.validatorId === userId;
-  const isAIAgent = dispute.validatorType === 'ai';
   const canAddEvidence = isCreator || isOpponent;
   const canMakeDecision = isValidator && dispute.status === 'In Review';
+
+  const mapEvidenceType = (type: EvidenceType): 'text' | 'image' | 'document' | 'link' => {
+    if (type === 'file') {
+      return 'document';
+    }
+    return type;
+  };
 
   const handleAddEvidence = () => {
     if (!newEvidence.content.trim()) {
@@ -119,22 +124,22 @@ export const DisputeDetail: React.FC = () => {
     try {
       setIsLoadingAnalysis(true);
       addToast('Requesting AI analysis...', 'info');
-      
+
       // Convert evidence to the format expected by the API
       const creatorEvidence = dispute.evidence
         .filter(e => e.submittedBy === dispute.creatorId)
         .map(e => ({
           id: e.id,
-          type: e.type,
+          type: mapEvidenceType(e.type),
           content: e.content,
           submitted_by: 'creator' as const,
         }));
-      
+
       const opponentEvidence = dispute.evidence
         .filter(e => e.submittedBy === dispute.opponentId)
         .map(e => ({
           id: e.id,
-          type: e.type,
+          type: mapEvidenceType(e.type),
           content: e.content,
           submitted_by: 'opponent' as const,
         }));
@@ -342,16 +347,16 @@ export const DisputeDetail: React.FC = () => {
               <div className="text-sm text-gray-700 dark:text-gray-300">
                 <ReactMarkdown
                   components={{
-                    h1: ({node, ...props}) => <h1 className="text-base font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-sm font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-xs font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
-                    p: ({node, ...props}) => <p className="mb-1.5 text-gray-700 dark:text-gray-300" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1.5 space-y-0.5 ml-3" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1.5 space-y-0.5 ml-3" {...props} />,
-                    li: ({node, ...props}) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-semibold text-gray-900 dark:text-gray-50" {...props} />,
-                    code: ({node, ...props}) => <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
-                    blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-gray-300 dark:border-gray-600 pl-3 italic my-1.5 text-gray-600 dark:text-gray-400" {...props} />,
+                    h1: ({ node, ...props }) => <h1 className="text-base font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
+                    h2: ({ node, ...props }) => <h2 className="text-sm font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
+                    h3: ({ node, ...props }) => <h3 className="text-xs font-bold mb-1 text-gray-900 dark:text-gray-50" {...props} />,
+                    p: ({ node, ...props }) => <p className="mb-1.5 text-gray-700 dark:text-gray-300" {...props} />,
+                    ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-1.5 space-y-0.5 ml-3" {...props} />,
+                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-1.5 space-y-0.5 ml-3" {...props} />,
+                    li: ({ node, ...props }) => <li className="text-gray-700 dark:text-gray-300" {...props} />,
+                    strong: ({ node, ...props }) => <strong className="font-semibold text-gray-900 dark:text-gray-50" {...props} />,
+                    code: ({ node, ...props }) => <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
+                    blockquote: ({ node, ...props }) => <blockquote className="border-l-2 border-gray-300 dark:border-gray-600 pl-3 italic my-1.5 text-gray-600 dark:text-gray-400" {...props} />,
                   }}
                 >
                   {dispute.decision.reason}
@@ -479,11 +484,10 @@ export const DisputeDetail: React.FC = () => {
             </div>
             {agentStatus && (
               <div className="mb-3 p-2 rounded bg-gray-50 dark:bg-gray-800/50">
-                <span className={`text-xs font-semibold ${
-                  agentStatus.status === 'ready' 
-                    ? 'text-green-600 dark:text-green-400' 
+                <span className={`text-xs font-semibold ${agentStatus.status === 'ready'
+                    ? 'text-green-600 dark:text-green-400'
                     : 'text-yellow-600 dark:text-yellow-400'
-                }`}>
+                  }`}>
                   {agentStatus.status === 'ready' ? '✓ Ready' : '⚠ Not Configured'}
                 </span>
               </div>
@@ -502,16 +506,16 @@ export const DisputeDetail: React.FC = () => {
                 <div className="text-xs text-blue-800 dark:text-blue-200 max-h-[400px] overflow-y-auto">
                   <ReactMarkdown
                     components={{
-                      h1: ({node, ...props}) => <h1 className="text-sm font-bold mb-1 text-blue-900 dark:text-blue-100" {...props} />,
-                      h2: ({node, ...props}) => <h2 className="text-xs font-bold mb-1 text-blue-900 dark:text-blue-100" {...props} />,
-                      h3: ({node, ...props}) => <h3 className="text-xs font-bold mb-0.5 text-blue-900 dark:text-blue-100" {...props} />,
-                      p: ({node, ...props}) => <p className="mb-1 text-blue-800 dark:text-blue-200" {...props} />,
-                      ul: ({node, ...props}) => <ul className="list-disc list-inside mb-1 space-y-0.5 ml-2" {...props} />,
-                      ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-1 space-y-0.5 ml-2" {...props} />,
-                      li: ({node, ...props}) => <li className="text-blue-800 dark:text-blue-200" {...props} />,
-                      strong: ({node, ...props}) => <strong className="font-semibold text-blue-900 dark:text-blue-100" {...props} />,
-                      code: ({node, ...props}) => <code className="bg-blue-100 dark:bg-blue-900/50 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
-                      blockquote: ({node, ...props}) => <blockquote className="border-l-2 border-blue-300 dark:border-blue-700 pl-2 italic my-1 text-blue-700 dark:text-blue-300" {...props} />,
+                      h1: ({ node, ...props }) => <h1 className="text-sm font-bold mb-1 text-blue-900 dark:text-blue-100" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xs font-bold mb-1 text-blue-900 dark:text-blue-100" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-xs font-bold mb-0.5 text-blue-900 dark:text-blue-100" {...props} />,
+                      p: ({ node, ...props }) => <p className="mb-1 text-blue-800 dark:text-blue-200" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-1 space-y-0.5 ml-2" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-1 space-y-0.5 ml-2" {...props} />,
+                      li: ({ node, ...props }) => <li className="text-blue-800 dark:text-blue-200" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-semibold text-blue-900 dark:text-blue-100" {...props} />,
+                      code: ({ node, ...props }) => <code className="bg-blue-100 dark:bg-blue-900/50 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
+                      blockquote: ({ node, ...props }) => <blockquote className="border-l-2 border-blue-300 dark:border-blue-700 pl-2 italic my-1 text-blue-700 dark:text-blue-300" {...props} />,
                     }}
                   >
                     {aiAnalysis.reasoning}
@@ -552,15 +556,15 @@ export const DisputeDetail: React.FC = () => {
               newEvidence.type === 'link'
                 ? 'Link URL'
                 : newEvidence.type === 'image'
-                ? 'Image URL'
-                : 'Content'
+                  ? 'Image URL'
+                  : 'Content'
             }
             placeholder={
               newEvidence.type === 'link'
                 ? 'https://example.com/proof'
                 : newEvidence.type === 'image'
-                ? 'https://example.com/image.png'
-                : 'Enter your evidence content...'
+                  ? 'https://example.com/image.png'
+                  : 'Enter your evidence content...'
             }
             value={newEvidence.content}
             onChange={(e) =>

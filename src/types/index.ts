@@ -49,6 +49,11 @@ export interface Dispute {
   stakeAmount: number;
   opponentStakeAmount: number;
   token: string;
+  creatorWallet?: string;
+  opponentWallet?: string;
+  escrowTxId?: string;
+  payoutTxId?: string;
+  neofsObjectId?: string;
   deadline?: Date; // Optional for Promise, not used for Bet
   evidenceRequirements?: string;
   evidence: Evidence[];
@@ -70,6 +75,7 @@ export interface CreateDisputeForm {
   type: DisputeType;
   description: string;
   opponentIdentifier: string;
+  opponentWalletAddress?: string;
   creatorPosition?: string; // For Bet: what creator thinks
   opponentPosition?: string; // For Bet: what opponent thinks
   stakeAmount: number;

@@ -6,11 +6,12 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input, Textarea, Select } from '../components/ui';
 import { User } from '../types';
-import { Wallet, User as UserIcon, Bell, Globe, Shield, AlertTriangle } from 'lucide-react';
+import { Wallet, User as UserIcon, Bell, AlertTriangle } from 'lucide-react';
+import { useWallet } from '../hooks';
 
 export const Profile: React.FC = () => {
-  const { currentUser, setUser, isWalletConnected, connectWallet, disconnectWallet, updatePreferences } =
-    useUserStore();
+  const { currentUser, setUser, setWalletAddress, updatePreferences } = useUserStore();
+  const { account, connect, disconnect, isConnecting, isNeoLineAvailable } = useWallet();
   const { addToast } = useUIStore();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState<Partial<User>>({});
@@ -34,12 +35,25 @@ export const Profile: React.FC = () => {
   };
 
   const handleWalletConnect = async () => {
-    if (isWalletConnected) {
-      disconnectWallet();
+    if (account) {
+      disconnect();
+      setWalletAddress(undefined);
       addToast('Wallet disconnected', 'info');
-    } else {
-      connectWallet();
-      addToast('Wallet connected (mock)', 'success');
+      return;
+    }
+
+    if (!isNeoLineAvailable) {
+      addToast('Install the NeoLine N3 wallet to connect', 'error');
+      return;
+    }
+
+    try {
+      const address = await connect();
+      setWalletAddress(address);
+      addToast('Wallet connected', 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to connect wallet';
+      addToast(message, 'error');
     }
   };
 
@@ -156,12 +170,12 @@ export const Profile: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Wallet & Web3</h2>
         </div>
         <div className="space-y-4">
-          {isWalletConnected ? (
+          {account ? (
             <>
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Wallet Address</p>
                 <p className="font-mono text-sm text-gray-900 dark:text-gray-50">
-                  {currentUser.walletAddress || 'Not connected'}
+                  {account.address}
                 </p>
               </div>
               <Button variant="secondary" onClick={handleWalletConnect}>
@@ -173,9 +187,14 @@ export const Profile: React.FC = () => {
               <p className="text-gray-600 dark:text-gray-400">
                 Connect a Neo-compatible wallet to interact with the blockchain.
               </p>
-              <Button variant="primary" onClick={handleWalletConnect}>
+              {currentUser.walletAddress && (
+                <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
+                  Last connected: {currentUser.walletAddress}
+                </p>
+              )}
+              <Button variant="primary" onClick={handleWalletConnect} disabled={isConnecting}>
                 <Wallet className="h-4 w-4 mr-2" />
-                Connect Neo-compatible Wallet
+                {isConnecting ? 'Connecting...' : 'Connect Neo-compatible Wallet'}
               </Button>
             </>
           )}

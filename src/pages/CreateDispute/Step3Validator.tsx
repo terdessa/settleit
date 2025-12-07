@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Input, Textarea, DateTimePicker, Select } from '../../components/ui';
-import { CreateDisputeForm, ValidatorType, ResolutionMethod } from '../../types';
-import { Info } from 'lucide-react';
+import React from 'react';
+import { Textarea, DateTimePicker } from '../../components/ui';
+import { CreateDisputeForm, ResolutionMethod } from '../../types';
 
 interface Step3ValidatorProps {
   formData: CreateDisputeForm;
@@ -14,18 +13,7 @@ export const Step3Validator: React.FC<Step3ValidatorProps> = ({
   onChange,
   errors,
 }) => {
-  const [evidenceRequirementsLength, setEvidenceRequirementsLength] = useState(
-    formData.evidenceRequirements?.length || 0
-  );
-
   const isBet = formData.type === 'Bet';
-
-  const handleValidatorTypeChange = (type: ValidatorType) => {
-    onChange({ validatorType: type });
-    if (type === 'ai') {
-      onChange({ validatorIdentifier: undefined });
-    }
-  };
 
   const handleResolutionMethodChange = (method: ResolutionMethod) => {
     onChange({ resolutionMethod: method });
@@ -114,7 +102,6 @@ export const Step3Validator: React.FC<Step3ValidatorProps> = ({
         value={formData.evidenceRequirements || ''}
         onChange={(e) => {
           const value = e.target.value;
-          setEvidenceRequirementsLength(value.length);
           onChange({ evidenceRequirements: value });
         }}
         rows={3}

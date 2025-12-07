@@ -159,7 +159,7 @@ export const useSpoonOS = () => {
    * Note: This requires dispute data to be passed separately.
    * For full integration, use submitForAnalysis directly.
    */
-  const getAgentAnalysis = async (disputeId: string) => {
+  const getAgentAnalysis = async (_disputeId: string) => {
     // This is a compatibility wrapper - returns a placeholder
     // In production, components should use submitForAnalysis with full dispute data
     console.warn('getAgentAnalysis: Use submitForAnalysis with full dispute data for real analysis');
@@ -179,7 +179,7 @@ export const useSpoonOS = () => {
    * Legacy method for backward compatibility.
    * Note: This is a placeholder. Use submitForAnalysis for real decisions.
    */
-  const requestAgentDecision = async (disputeId: string) => {
+  const requestAgentDecision = async (_disputeId: string) => {
     console.warn('requestAgentDecision: Use submitForAnalysis for real AI decisions');
     return {
       decision: 'creator' as const,

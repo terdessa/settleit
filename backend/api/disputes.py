@@ -46,6 +46,11 @@ class DisputeResponse(BaseModel):
     stake_amount: float
     opponent_stake_amount: float
     token: str
+    creator_wallet: Optional[str] = None
+    opponent_wallet: Optional[str] = None
+    escrow_tx_id: Optional[str] = None
+    payout_tx_id: Optional[str] = None
+    neofs_object_id: Optional[str] = None
     deadline: Optional[str] = None
     evidence_requirements: Optional[str] = None
     evidence: List[EvidenceItem] = []
@@ -72,6 +77,8 @@ class CreateDisputeRequest(BaseModel):
     deadline: Optional[str] = None  # For Promise
     evidence_requirements: Optional[str] = None
     resolution_method: Optional[str] = None  # 'ai' or 'human'
+    creator_wallet: Optional[str] = None
+    opponent_wallet: Optional[str] = None
 
 
 
@@ -121,6 +128,11 @@ async def get_all_disputes():
             stake_amount=dispute['stake_amount'],
             opponent_stake_amount=dispute['opponent_stake_amount'],
             token=dispute['token'],
+            creator_wallet=dispute.get('creator_wallet'),
+            opponent_wallet=dispute.get('opponent_wallet'),
+            escrow_tx_id=dispute.get('escrow_tx_id'),
+            payout_tx_id=dispute.get('payout_tx_id'),
+            neofs_object_id=dispute.get('neofs_object_id'),
             deadline=dispute.get('deadline'),
             evidence_requirements=dispute.get('evidence_requirements'),
             evidence=evidence,
@@ -180,6 +192,11 @@ async def get_dispute(dispute_id: str):
         stake_amount=dispute['stake_amount'],
         opponent_stake_amount=dispute['opponent_stake_amount'],
         token=dispute['token'],
+        creator_wallet=dispute.get('creator_wallet'),
+        opponent_wallet=dispute.get('opponent_wallet'),
+        escrow_tx_id=dispute.get('escrow_tx_id'),
+        payout_tx_id=dispute.get('payout_tx_id'),
+        neofs_object_id=dispute.get('neofs_object_id'),
         deadline=dispute.get('deadline'),
         evidence_requirements=dispute.get('evidence_requirements'),
         evidence=evidence,
@@ -219,6 +236,8 @@ async def create_dispute(request: CreateDisputeRequest):
         'description': request.description or '',  # Allow empty description
         'creator_id': 'user1',  # TODO: Get from auth
         'opponent_id': request.opponent_id,
+        'creator_wallet': request.creator_wallet,
+        'opponent_wallet': request.opponent_wallet,
         'creator_position': request.creator_position,
         'opponent_position': request.opponent_position,
         'validator_id': validator_id,
@@ -231,6 +250,9 @@ async def create_dispute(request: CreateDisputeRequest):
         'deadline': request.deadline,
         'evidence_requirements': request.evidence_requirements,
         'created_at': datetime.now().isoformat(),
+        'escrow_tx_id': None,
+        'payout_tx_id': None,
+        'neofs_object_id': None,
     }
     
     await db.create_dispute(dispute_data)

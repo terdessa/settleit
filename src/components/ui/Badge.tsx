@@ -2,15 +2,17 @@ import React from 'react';
 import { clsx } from 'clsx';
 import { DisputeStatus } from '../../types';
 
+type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info';
+
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info';
+  variant?: BadgeVariant;
   size?: 'sm' | 'md';
   status?: DisputeStatus;
   className?: string;
 }
 
-const statusVariantMap: Record<DisputeStatus, BadgeProps['variant']> = {
+const statusVariantMap: Record<DisputeStatus, BadgeVariant> = {
   'Draft': 'default',
   'Awaiting Funding': 'warning',
   'In Review': 'info',
@@ -25,9 +27,11 @@ export const Badge: React.FC<BadgeProps> = ({
   status,
   className,
 }) => {
-  const computedVariant = status ? statusVariantMap[status] : variant || 'default';
+  const computedVariant: BadgeVariant = status
+    ? statusVariantMap[status]
+    : (variant ?? 'default');
 
-  const variantStyles = {
+  const variantStyles: Record<BadgeVariant, string> = {
     default: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100',
     success: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
     warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',

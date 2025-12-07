@@ -49,6 +49,19 @@ npm install
 - Edit `backend/.env`
 - Add at least one: `GEMINI_API_KEY`, `OPENAI_API_KEY`, or `ANTHROPIC_API_KEY`
 
+**4. Configure Neo + NeoFS (for on-chain escrow):**
+- Frontend `.env` (create `./.env` if missing):
+	- `VITE_NEO_RPC_URL` – RPC endpoint (default Neo N3 TestNet seed)
+	- `VITE_NEO_NETWORK_MAGIC` – magic number (894710606 for TestNet)
+	- `VITE_ESCROW_CONTRACT_HASH` – script hash of your escrow contract
+	- `VITE_NEOFS_GATEWAY_URL` – optional gateway for dispute proofs
+- Backend `backend/.env`:
+	- `NEO_RPC_URL`, `NEO_NETWORK_MAGIC`
+	- `NEO_ESCROW_CONTRACT_HASH`, `NEO_ORACLE_WIF` (oracle signer WIF)
+	- `NEOFS_GATEWAY_URL`, `NEOFS_CONTAINER_ID`, `NEOFS_WALLET_WIF`
+- Install the [NeoLine N3 browser extension](https://neoline.io/en/)
+- Fund two TestNet wallets via the [Neo faucet](https://n3t5wish.ngd.network/#/)
+
 ### Running the Application
 
 **Terminal 1 - Start Backend:**
@@ -86,8 +99,8 @@ src/
 │   ├── ui/          # Base UI components (Button, Card, Modal, etc.)
 │   └── Logo.tsx     # Logo component
 ├── hooks/           # Custom React hooks
-│   ├── useWallet.ts          # Wallet integration (placeholder)
-│   ├── useNeoIntegration.ts  # Neo blockchain hooks (placeholder)
+│   ├── useWallet.ts          # NeoLine wallet integration (global Zustand store)
+│   ├── useNeoIntegration.ts  # Escrow helper for Neo smart contracts
 │   └── useSpoonOS.ts         # SpoonOS agent hooks (placeholder)
 ├── layouts/         # Layout components
 │   └── AppLayout.tsx  # Main app layout with navigation
@@ -123,7 +136,8 @@ The backend runs on `http://localhost:8000` and provides:
 
 ## Future Integrations
 
-- **Neo Blockchain** - For on-chain dispute creation, stake locking, and automated payouts
+- **Escrow Smart Contract** - Deployable TypeScript/Python Neo contract (coming soon) powering the hooks already wired in the UI
+- **NeoFS Evidence Bundles** - Automated upload + hashing service for dispute proofs
 
 ## Mock Data
 
@@ -132,8 +146,8 @@ The application uses mock data for dispute management (local state). AI analysis
 ## Development Notes
 
 - SpoonOS backend integration is fully functional
-- Wallet connection is mocked (UI only)
-- Dispute state is in-memory (resets on page refresh)
+- NeoLine wallet connections are live; connect via the top-right button before creating bets
+- Dispute state persists in SQLite (`backend/settleit.db`) but still a prototype schema
 - AI analysis requires backend API keys to be configured
 
 ## License
